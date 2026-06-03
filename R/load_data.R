@@ -22,6 +22,11 @@ source(here::here("R/constants.R"), local = FALSE)
 
   suppressMessages(
     readr::read_delim(path, delim = "\t", col_names = TRUE, show_col_types = FALSE) %>%
+      dplyr::rename(
+        nearest_gene      = locus,
+        index_variant     = index_snv,
+        t_2_d_risk_allele = risk_allele
+      ) %>%
       dplyr::filter(!is.na(alt)) %>%
       dplyr::mutate(
         is_index    = unname(IS_INDEX_LABELS[phenotype]),

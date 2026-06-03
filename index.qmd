@@ -1,13 +1,13 @@
 ---
 title: "ISI–T2D Genetic Association Browser"
-subtitle: "Interactive browser for T2D genetic associations with 21 insulin sensitivity indices"
+subtitle: "Interactive browser for T2D genetic associations with 23 insulin sensitivity indices"
 format:
   dashboard:
     scrolling: true
     theme: cosmo
     nav-buttons:
       - icon: github
-        href: https://github.com/USERNAME/isi_t2d_nat_24
+        href: https://github.com/USERNAMEsufyansuleman/isi_t2d_nat_24
 execute:
   echo: false
   warning: false
@@ -77,6 +77,16 @@ viewof sigHighlight = Inputs.toggle({
 
 ---
 
+**Citation**
+
+<small>If you use data from this resource, please cite:<br>
+Suleman S, Ängquist L, Linneberg A, Hansen T, Grarup N.<br>
+*Exploring the genetic intersection between obesity-associated genetic variants and insulin sensitivity indices.*<br>
+**Sci Rep.** 2025;15(1):15761.<br>
+[doi:10.1038/s41598-025-98507-w](https://doi.org/10.1038/s41598-025-98507-w) · PMID: 40328835</small>
+
+---
+
 **Summary**
 
 ```{ojs}
@@ -103,18 +113,18 @@ viewof sigHighlight = Inputs.toggle({
 // Fixed x-axis order: fasting → OGTT 0,120 → OGTT 0,30,120
 IS_INDEX_ORDER = [
   "inv-FIns", "inv-HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal",
-  "inv-FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0",
+  "inv-FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0", "FIRI",
   "inv-Ins 120", "inv-Glu 120", "ISI 120", "inv-Ins/Glu120", "Gutt Index",
   "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "inv-IFC",
-  "BIGTT SI", "Matsuda"
+  "BIGTT SI", "Matsuda", "Matsuda AUC"
 ]
 
 // Group → colour band for background stripe
-GROUP_COLOR = {
+GROUP_COLOR = ({
   "Fasting":       "#f0f4ff",
   "OGTT,0-120":    "#fff7f0",
   "OGTT,0-30-120": "#f0fff4"
-}
+})
 
 rawData = analysisType === "BMI-Adjusted"
   ? transpose(data_bmi)
@@ -139,7 +149,7 @@ uniqueVariants = [...new Set(filtered.map(d => d.gene_snp_ra))]
 // Visible x-axis indices
 visibleIndices = IS_INDEX_ORDER.filter(idx => {
   const fasting = ["inv-FIns","inv-HOMA-IR","Raynaud SI","QUICKI","Belfiore basal",
-                   "inv-FIns/FGlu","ISI basal","Bennett SI","Avignon SI0"]
+                   "inv-FIns/FGlu","ISI basal","Bennett SI","Avignon SI0","FIRI"]
   const ogtt2   = ["inv-Ins 120","inv-Glu 120","ISI 120","inv-Ins/Glu120","Gutt Index",
                    "Avignon SI120","Avignon SIM","Stumvoll Modi","Stumvoll Dem","inv-IFC"]
   if (fasting.includes(idx)) return indexGroups.includes("Fasting")

@@ -6,7 +6,7 @@
 
 FASTING_PHENOTYPES <- c(
   "insu0", "raynaud", "homa_ir", "quicki", "belfiore_0",
-  "ig_ratio_0", "isi_0", "bennett", "avignon_si0"
+  "ig_ratio_0", "isi_0", "bennett", "avignon_si0", "firi"
 )
 
 OGTT_0_120_PHENOTYPES <- c(
@@ -14,7 +14,7 @@ OGTT_0_120_PHENOTYPES <- c(
   "avignon_si120", "avignon_sim", "mod_stumvoll", "stumvoll_dem", "ifc"
 )
 
-OGTT_0_30_120_PHENOTYPES <- c("bigtt_si", "matsuda")
+OGTT_0_30_120_PHENOTYPES <- c("bigtt_si", "matsuda", "matsuda_auc")
 
 ALL_PHENOTYPES <- c(
   FASTING_PHENOTYPES, OGTT_0_120_PHENOTYPES, OGTT_0_30_120_PHENOTYPES
@@ -44,16 +44,19 @@ IS_INDEX_LABELS <- c(
   stumvoll_dem  = "Stumvoll Dem",
   ifc           = "inv-IFC",
   bigtt_si      = "BIGTT SI",
-  matsuda       = "Matsuda"
+  matsuda       = "Matsuda",
+  firi          = "FIRI",
+  matsuda_auc   = "Matsuda AUC"
 )
 
 # Fixed display order for x-axis (fasting → OGTT 0,120 → OGTT 0,30,120)
 IS_INDEX_ORDER <- c(
   "inv-FIns",       "inv-HOMA-IR",    "Raynaud SI",     "QUICKI",
   "Belfiore basal", "inv-FIns/FGlu",  "ISI basal",      "Bennett SI",     "Avignon SI0",
+  "FIRI",
   "inv-Ins 120",    "inv-Glu 120",    "ISI 120",        "inv-Ins/Glu120", "Gutt Index",
   "Avignon SI120",  "Avignon SIM",    "Stumvoll Modi",  "Stumvoll Dem",   "inv-IFC",
-  "BIGTT SI",       "Matsuda"
+  "BIGTT SI",       "Matsuda",        "Matsuda AUC"
 )
 
 # ── Colours ───────────────────────────────────────────────────────────────────
