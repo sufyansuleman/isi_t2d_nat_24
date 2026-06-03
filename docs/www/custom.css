@@ -10,7 +10,7 @@
 
 /* ── Controls card (vertical stack, fixed width) ─────────────────────────── */
 .left-column {
-  flex:          0 0 260px;
+  flex:          0 0 340px;
   display:       flex;
   flex-direction: column;
   gap:           0.75rem;
@@ -183,6 +183,26 @@
   .top-panels { flex-wrap: wrap; }
   .left-column { flex: 1 1 100%; }
   .citation-card { flex: 1 1 100%; }
+}
+
+/* ── Page-width override (Quarto grid may still add padding) ─────────────── */
+.page-full main,
+#quarto-document-content {
+  max-width: 100%;
+  padding-left:  1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* ── Page description intro block ───────────────────────────────────────── */
+.page-description {
+  background:    #f0f4f8;
+  border-left:   4px solid #2980b9;
+  border-radius: 0 8px 8px 0;
+  padding:       0.9rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size:     0.93rem;
+  color:         #2c3e50;
+  line-height:   1.65;
 }
 
 /* ── Highlight row on hover in DT ───────────────────────────────────────── */

@@ -1,6 +1,6 @@
 ---
-title: "ISI–T2D Genetic Association Browser"
-subtitle: "Interactive browser for T2D genetic associations with 23 insulin sensitivity indices"
+title: "ISI\u2013T2D Pathophysiology Browser"
+subtitle: "Insulin sensitivity associations of T2D GWAS risk variants \u2014 direction of effect across 23 indices"
 execute:
   echo: false
   warning: false
@@ -17,6 +17,10 @@ ojs_define(
   data_no_bmi = data$no_bmi
 )
 ```
+
+::: {.page-description}
+Genetic variants identified in the largest genome-wide association study (GWAS) of type 2 diabetes (T2D) to date — **Suzuki et al., *Nature* 2024** (>2.5 million individuals) — were tested for association with **23 insulin sensitivity indices (ISIs)** derived from fasting blood measurements and oral glucose tolerance tests (OGTTs). For each variant, this browser lets you explore *which ISI it associates with* and *in which direction*, providing mechanistic insight into whether T2D risk alleles act through insulin resistance, impaired insulin secretion, or mixed pathophysiology. Analyses are presented both unadjusted and adjusted for BMI.
+:::
 
 ::: {.top-panels}
 

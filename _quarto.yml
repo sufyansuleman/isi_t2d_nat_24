@@ -14,6 +14,9 @@ format:
     theme: cosmo
     toc: false
     css: www/custom.css
+    grid:
+      body-width: 1400px
+      margin-width: 0px
 
 execute:
   freeze: auto
