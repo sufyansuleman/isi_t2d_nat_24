@@ -13,12 +13,7 @@ format:
   html:
     theme: cosmo
     toc: false
+    css: www/custom.css
 
 execute:
   freeze: auto
-
-# To deploy to GitHub Pages:
-#   1. Set repo-url above to your actual repo
-#   2. In your GitHub repo settings > Pages > set Source to "Deploy from branch: gh-pages"
-#   3. Run: quarto publish gh-pages
-#      (one-time setup; after that just re-run whenever you update data)

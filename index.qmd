@@ -1,13 +1,6 @@
 ---
 title: "ISI–T2D Genetic Association Browser"
 subtitle: "Interactive browser for T2D genetic associations with 23 insulin sensitivity indices"
-format:
-  dashboard:
-    scrolling: true
-    theme: cosmo
-    nav-buttons:
-      - icon: github
-        href: https://github.com/USERNAMEsufyansuleman/isi_t2d_nat_24
 execute:
   echo: false
   warning: false
@@ -25,9 +18,11 @@ ojs_define(
 )
 ```
 
-## {.sidebar}
+::: {.top-panels}
 
-### Controls {.card}
+::: {.left-column}
+
+::: {.controls-card}
 
 ```{ojs}
 viewof searchQuery = Inputs.text({
@@ -75,37 +70,37 @@ viewof sigHighlight = Inputs.toggle({
 })
 ```
 
----
+:::
 
-**Citation**
-
-<small>If you use data from this resource, please cite:<br>
-Suleman S, Ängquist L, Linneberg A, Hansen T, Grarup N.<br>
-*Exploring the genetic intersection between obesity-associated genetic variants and insulin sensitivity indices.*<br>
-**Sci Rep.** 2025;15(1):15761.<br>
-[doi:10.1038/s41598-025-98507-w](https://doi.org/10.1038/s41598-025-98507-w) · PMID: 40328835</small>
-
----
-
-**Summary**
+::: {.stats-card .stats-card--horizontal}
 
 ```{ojs}
 {
-  const nVar   = new Set(filtered.map(d => d.gene_snp_ra)).size;
-  const nGene  = new Set(filtered.map(d => d.nearest_gene)).size;
-  const nSig   = filtered.filter(d => +d.pvalue < 0.05).length;
-  return html`
-    <table style="font-size:0.8rem;width:100%;border-collapse:collapse">
-      <tr><td style="color:#555">Variants shown</td><td align="right"><b>${nVar}</b></td></tr>
-      <tr><td style="color:#555">Unique genes</td><td align="right"><b>${nGene}</b></td></tr>
-      <tr><td style="color:#555">Sig. assoc. (p&lt;0.05)</td><td align="right"><b>${nSig}</b></td></tr>
-    </table>`;
+  const nVar  = new Set(filtered.map(d => d.gene_snp_ra)).size;
+  const nGene = new Set(filtered.map(d => d.nearest_gene)).size;
+  const nSig  = filtered.filter(d => +d.pvalue < 0.05).length;
+  return html`<div class="stat-block">
+    <div class="stat-item">
+      <span class="stat-num">${nVar}</span>
+      <span class="stat-lbl">variants</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">${nGene}</span>
+      <span class="stat-lbl">genes</span>
+    </div>
+    <div class="stat-item sig">
+      <span class="stat-num">${nSig}</span>
+      <span class="stat-lbl">sig. (p&lt;0.05)</span>
+    </div>
+  </div>`;
 }
 ```
 
-## Heatmap {.tabset}
+:::
 
-### Association Heatmap
+:::
+
+:::
 
 ```{ojs}
 //| output: false
@@ -118,13 +113,6 @@ IS_INDEX_ORDER = [
   "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "inv-IFC",
   "BIGTT SI", "Matsuda", "Matsuda AUC"
 ]
-
-// Group → colour band for background stripe
-GROUP_COLOR = ({
-  "Fasting":       "#f0f4ff",
-  "OGTT,0-120":    "#fff7f0",
-  "OGTT,0-30-120": "#f0fff4"
-})
 
 rawData = analysisType === "BMI-Adjusted"
   ? transpose(data_bmi)
@@ -143,10 +131,8 @@ filtered = rawData.filter(d => {
   return matchSearch && matchGroup && matchPval && matchBeta
 })
 
-// Variants in their original (clustered) order, deduplicated
 uniqueVariants = [...new Set(filtered.map(d => d.gene_snp_ra))]
 
-// Visible x-axis indices
 visibleIndices = IS_INDEX_ORDER.filter(idx => {
   const fasting = ["inv-FIns","inv-HOMA-IR","Raynaud SI","QUICKI","Belfiore basal",
                    "inv-FIns/FGlu","ISI basal","Bennett SI","Avignon SI0","FIRI"]
@@ -165,6 +151,12 @@ leftMarg = Math.min(280, Math.max(160,
              Math.max(...uniqueVariants.map(s => s.length)) * 6))
 ```
 
+## Association Heatmap
+
+::: {.panel-tabset}
+
+### Heatmap
+
 ```{ojs}
 Plot.plot({
   width:        plotW,
@@ -181,7 +173,7 @@ Plot.plot({
     domain:  [-0.02, 0.02],
     legend:  true,
     label:   "Effect size (β)",
-    reverse: true    // red = positive (higher IS)
+    reverse: true
   },
 
   x: {
@@ -198,7 +190,6 @@ Plot.plot({
   },
 
   marks: [
-    // Main heatmap cells
     Plot.cell(filtered, {
       x:     "is_index",
       y:     "gene_snp_ra",
@@ -215,8 +206,6 @@ Plot.plot({
       strokeWidth: 0.4,
       rx: 1
     }),
-
-    // Black border for nominally significant (p < 0.05)
     sigHighlight
       ? Plot.cell(filtered.filter(d => +d.pvalue < 0.05), {
           x:           "is_index",
@@ -226,9 +215,7 @@ Plot.plot({
           fill:        "none",
           rx: 1
         })
-      : Plot.dot([], {}),   // no-op when toggle is off
-
-    // White star for genome-wide / Bonferroni significant
+      : Plot.dot([], {}),
     Plot.text(filtered.filter(d => +d.pvalue < 1e-4), {
       x:          "is_index",
       y:          "gene_snp_ra",
@@ -250,13 +237,13 @@ Inputs.table(filtered, {
     "is_index", "index_group", "beta", "pvalue"
   ],
   header: {
-    nearest_gene:     "Gene",
-    index_variant:    "Variant (rsID)",
-    t_2_d_risk_allele:"Risk Allele",
-    is_index:         "IS Index",
-    index_group:      "Index Group",
-    beta:             "β (Effect Size)",
-    pvalue:           "P-value"
+    nearest_gene:      "Gene",
+    index_variant:     "Variant (rsID)",
+    t_2_d_risk_allele: "Risk Allele",
+    is_index:          "IS Index",
+    index_group:       "Index Group",
+    beta:              "β (Effect Size)",
+    pvalue:            "P-value"
   },
   format: {
     beta:   x => (+x).toFixed(5),
@@ -268,16 +255,18 @@ Inputs.table(filtered, {
 })
 ```
 
-## Gene Explorer {.tabset}
+:::
+
+## Gene Explorer
+
+::: {.panel-tabset}
 
 ### By Gene – top associations
 
 ```{ojs}
 //| output: false
-// For each gene, compute best p-value across all indices and analyses
 d3 = require("d3-array@3")
 
-// Roll up to gene × is_index level: pick min pvalue, mean beta
 geneRollup = d3.rollups(
   filtered,
   v => ({
@@ -302,7 +291,7 @@ uniqueGenes = [...new Set(geneRollup.map(d => d.nearest_gene))]
     const minB = Math.min(...geneRollup.filter(d => d.nearest_gene===b).map(d=>d.min_pvalue))
     return minA - minB
   })
-  .slice(0, 80)   // cap at 80 genes for performance
+  .slice(0, 80)
 
 geneRollupFiltered = geneRollup.filter(d => uniqueGenes.includes(d.nearest_gene))
 
@@ -407,3 +396,15 @@ Inputs.table(geneSummary, {
   rows:    25
 })
 ```
+
+:::
+
+---
+
+::: {.citation-card .citation-footer}
+<p class="citation-heading">📖 References</p>
+
+1. Suzuki K, Hatzikotoulas K, Southam L, Taylor HJ, Yin X, Lorenz KM, et al. **Genetic drivers of heterogeneity in type 2 diabetes pathophysiology.** *Nature.* 2024;627:347–357. [doi:10.1038/s41586-024-07019-6](https://doi.org/10.1038/s41586-024-07019-6)
+
+2. Suleman S, Ängquist L, Linneberg A, Hansen T, Grarup N. **Exploring the genetic intersection between obesity-associated genetic variants and insulin sensitivity indices.** *Sci Rep.* 2025;15(1):15761. [doi:10.1038/s41598-025-98507-w](https://doi.org/10.1038/s41598-025-98507-w) · PMID: 40328835
+:::
