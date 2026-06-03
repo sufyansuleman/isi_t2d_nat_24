@@ -1,0 +1,103 @@
+name: Deploy Shiny dashboard to shinyapps.io
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [main]          # auto-deploy on every push to main
+  workflow_dispatch:           # allow manual re-deploy from the GitHub Actions UI
+
+# ── Job ───────────────────────────────────────────────────────────────────────
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      RENV_PATHS_ROOT: ~/.local/share/renv
+
+    steps:
+      # 1. Check out the repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Set up R 4.4
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+          use-public-rspm: true   # faster binary packages
+
+      # 3. Cache R packages so subsequent runs are fast
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: ${{ runner.os }}-renv-
+
+      # 4. Install all required packages
+      #    (replace with renv::restore() once you have a renv.lock)
+      - name: Install R packages
+        shell: Rscript {0}
+        run: |
+          pkgs <- c(
+            "shiny", "flexdashboard", "plotly", "DT",
+            "dplyr", "tidyr", "readr", "purrr", "here", "scales",
+            "rsconnect"
+          )
+          install.packages(pkgs, repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
+
+      # 5. (Optional) Download data files if you host them externally.
+      #    Comment this step out if data is committed to the repo.
+      #
+      # - name: Download association data
+      #   run: |
+      #     curl -L "${{ secrets.DATA_URL }}" -o data.zip
+      #     unzip -o data.zip -d data/
+
+      # 6. Deploy to shinyapps.io using three GitHub Secrets.
+      #    Add these in:  repo Settings → Secrets → Actions → New repository secret
+      #      SHINYAPPS_NAME    your shinyapps.io account name
+      #      SHINYAPPS_TOKEN   token from shinyapps.io → Account → Tokens
+      #      SHINYAPPS_SECRET  secret from the same token page
+      - name: Deploy to shinyapps.io
+        shell: Rscript {0}
+        env:
+          SHINYAPPS_NAME:   ${{ secrets.SHINYAPPS_NAME }}
+          SHINYAPPS_TOKEN:  ${{ secrets.SHINYAPPS_TOKEN }}
+          SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+        run: |
+          rsconnect::setAccountInfo(
+            name   = Sys.getenv("SHINYAPPS_NAME"),
+            token  = Sys.getenv("SHINYAPPS_TOKEN"),
+            secret = Sys.getenv("SHINYAPPS_SECRET")
+          )
+
+          app_files <- c(
+            "dashboard.Rmd",
+            "R/constants.R",
+            "R/load_data.R",
+            "R/plots.R",
+            "www/custom.css"
+          )
+
+          # Include data files if they are present (generated locally or downloaded above)
+          data_txts <- list.files("data", pattern = "\\.txt$|\\.tsv$|\\.csv$",
+                                  full.names = FALSE)
+          if (length(data_txts) > 0)
+            app_files <- c(app_files, file.path("data", data_txts))
+
+          rsconnect::deployApp(
+            appDir      = ".",
+            appFiles    = app_files,
+            appName     = "isi-t2d-browser",
+            appTitle    = "ISI-T2D Genetic Association Browser",
+            forceUpdate = TRUE,
+            launch.browser = FALSE
+          )
+
+# ── What to do ONCE before using this workflow ────────────────────────────────
+# 1. Sign up at https://www.shinyapps.io  (free tier: 5 apps, 25 active hours/month)
+# 2. Go to:  shinyapps.io → Account → Tokens → Show → Copy
+# 3. In GitHub repo:  Settings → Secrets and variables → Actions → New repository secret
+#    Add three secrets:  SHINYAPPS_NAME, SHINYAPPS_TOKEN, SHINYAPPS_SECRET
+# 4. Push anything to main → workflow runs → app is live at:
+#    https://YOUR_NAME.shinyapps.io/isi-t2d-browser/

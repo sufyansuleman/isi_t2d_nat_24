@@ -1,0 +1,64 @@
+/* ── ISI-T2D Dashboard — custom styles ───────────────────────────────────── */
+
+/* Tighter sidebar padding */
+.sidebar-section { padding: 6px 10px 0 10px; }
+.sidebar-section hr { margin: 8px 0; border-color: #ddd; }
+
+/* Make every chart pane fill its flex container cleanly */
+.chart-wrapper,
+.chart-stage,
+.chart-stage-flex {
+  overflow: hidden !important;
+}
+
+/* Plotly outputs fill available height within their card */
+.plotly.html-widget {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* Scrollable heatmap: let plotly's own pan/zoom handle navigation */
+.heatmap-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 120px);
+}
+
+/* Data table fills its panel */
+.dataTables_wrapper {
+  height: calc(100vh - 220px);
+}
+
+/* Smaller action buttons in sidebar */
+.btn-sm { font-size: 0.78rem; padding: 3px 8px; }
+
+/* Dashboard nav tabs — bolder active tab */
+.navbar-brand { font-weight: 600; font-size: 1.05rem; }
+
+/* Value-box style stat pills in sidebar */
+.stat-pill {
+  display: inline-block;
+  background: #e9f0f8;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 0.75rem;
+  color: #1a5276;
+  margin-bottom: 3px;
+}
+
+/* Highlight row on hover in DT */
+table.dataTable tbody tr:hover {
+  background-color: #eaf2fb !important;
+}
+
+/* Column filter inputs — compact */
+.dataTables_filter input {
+  height: 26px;
+  font-size: 0.82rem;
+}
+
+/* Remove unnecessary scrollbar from flexdashboard chart sections */
+.chart-stage-flex .flexfill-item { overflow: hidden; }
+
+/* Sidebar: scrollable if content overflows on small screens */
+.section.sidebar { overflow-y: auto; }

@@ -1,0 +1,24 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "ISI-T2D Association Browser"
+  description: "Interactive browser for T2D genetic associations with insulin sensitivity indices"
+  repo-url: https://github.com/USERNAME/isi_t2d_nat_24
+  repo-actions: [issue]
+  page-navigation: true
+
+format:
+  html:
+    theme: cosmo
+    toc: false
+
+execute:
+  freeze: auto
+
+# To deploy to GitHub Pages:
+#   1. Set repo-url above to your actual repo
+#   2. In your GitHub repo settings > Pages > set Source to "Deploy from branch: gh-pages"
+#   3. Run: quarto publish gh-pages
+#      (one-time setup; after that just re-run whenever you update data)

@@ -1,0 +1,399 @@
+---
+title: "ISI–T2D Genetic Association Browser"
+subtitle: "Interactive browser for T2D genetic associations with 21 insulin sensitivity indices"
+format:
+  dashboard:
+    scrolling: true
+    theme: cosmo
+    nav-buttons:
+      - icon: github
+        href: https://github.com/USERNAME/isi_t2d_nat_24
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+source("R/load_data.R")
+data <- load_combined_data("data")
+
+ojs_define(
+  data_bmi    = data$bmi,
+  data_no_bmi = data$no_bmi
+)
+```
+
+## {.sidebar}
+
+### Controls {.card}
+
+```{ojs}
+viewof searchQuery = Inputs.text({
+  label: "🔍 Search gene / rsID",
+  placeholder: "e.g. KCNJ11 or rs5219",
+  value: ""
+})
+```
+
+```{ojs}
+viewof analysisType = Inputs.radio(
+  ["BMI-Adjusted", "BMI-Unadjusted"],
+  { label: "Analysis", value: "BMI-Adjusted" }
+)
+```
+
+```{ojs}
+viewof indexGroups = Inputs.checkbox(
+  ["Fasting", "OGTT,0-120", "OGTT,0-30-120"],
+  {
+    label: "Index Groups",
+    value: ["Fasting", "OGTT,0-120", "OGTT,0-30-120"]
+  }
+)
+```
+
+```{ojs}
+viewof pvalThresh = Inputs.range(
+  [0, 1],
+  { label: "Max p-value", value: 1, step: 0.01, format: x => x.toFixed(2) }
+)
+```
+
+```{ojs}
+viewof betaMin = Inputs.range(
+  [0, 0.1],
+  { label: "Min |β|", value: 0, step: 0.001, format: x => x.toFixed(3) }
+)
+```
+
+```{ojs}
+viewof sigHighlight = Inputs.toggle({
+  label: "Highlight p < 0.05 (black border)",
+  value: true
+})
+```
+
+---
+
+**Summary**
+
+```{ojs}
+{
+  const nVar   = new Set(filtered.map(d => d.gene_snp_ra)).size;
+  const nGene  = new Set(filtered.map(d => d.nearest_gene)).size;
+  const nSig   = filtered.filter(d => +d.pvalue < 0.05).length;
+  return html`
+    <table style="font-size:0.8rem;width:100%;border-collapse:collapse">
+      <tr><td style="color:#555">Variants shown</td><td align="right"><b>${nVar}</b></td></tr>
+      <tr><td style="color:#555">Unique genes</td><td align="right"><b>${nGene}</b></td></tr>
+      <tr><td style="color:#555">Sig. assoc. (p&lt;0.05)</td><td align="right"><b>${nSig}</b></td></tr>
+    </table>`;
+}
+```
+
+## Heatmap {.tabset}
+
+### Association Heatmap
+
+```{ojs}
+//| output: false
+
+// Fixed x-axis order: fasting → OGTT 0,120 → OGTT 0,30,120
+IS_INDEX_ORDER = [
+  "inv-FIns", "inv-HOMA-IR", "Raynaud SI", "QUICKI", "Belfiore basal",
+  "inv-FIns/FGlu", "ISI basal", "Bennett SI", "Avignon SI0",
+  "inv-Ins 120", "inv-Glu 120", "ISI 120", "inv-Ins/Glu120", "Gutt Index",
+  "Avignon SI120", "Avignon SIM", "Stumvoll Modi", "Stumvoll Dem", "inv-IFC",
+  "BIGTT SI", "Matsuda"
+]
+
+// Group → colour band for background stripe
+GROUP_COLOR = {
+  "Fasting":       "#f0f4ff",
+  "OGTT,0-120":    "#fff7f0",
+  "OGTT,0-30-120": "#f0fff4"
+}
+
+rawData = analysisType === "BMI-Adjusted"
+  ? transpose(data_bmi)
+  : transpose(data_no_bmi)
+
+filtered = rawData.filter(d => {
+  const q = searchQuery.toLowerCase().trim()
+  const matchSearch =
+    q === "" ||
+    (d.nearest_gene  && d.nearest_gene.toLowerCase().includes(q))  ||
+    (d.index_variant && d.index_variant.toLowerCase().includes(q)) ||
+    (d.gene_snp_ra   && d.gene_snp_ra.toLowerCase().includes(q))
+  const matchGroup = indexGroups.includes(d.index_group)
+  const matchPval  = +d.pvalue <= pvalThresh
+  const matchBeta  = Math.abs(+d.beta) >= betaMin
+  return matchSearch && matchGroup && matchPval && matchBeta
+})
+
+// Variants in their original (clustered) order, deduplicated
+uniqueVariants = [...new Set(filtered.map(d => d.gene_snp_ra))]
+
+// Visible x-axis indices
+visibleIndices = IS_INDEX_ORDER.filter(idx => {
+  const fasting = ["inv-FIns","inv-HOMA-IR","Raynaud SI","QUICKI","Belfiore basal",
+                   "inv-FIns/FGlu","ISI basal","Bennett SI","Avignon SI0"]
+  const ogtt2   = ["inv-Ins 120","inv-Glu 120","ISI 120","inv-Ins/Glu120","Gutt Index",
+                   "Avignon SI120","Avignon SIM","Stumvoll Modi","Stumvoll Dem","inv-IFC"]
+  if (fasting.includes(idx)) return indexGroups.includes("Fasting")
+  if (ogtt2.includes(idx))   return indexGroups.includes("OGTT,0-120")
+  return indexGroups.includes("OGTT,0-30-120")
+})
+
+cellH    = uniqueVariants.length <= 50 ? 18 : uniqueVariants.length <= 200 ? 12 : 8
+plotH    = Math.max(400, uniqueVariants.length * cellH + 140)
+cellW    = 28
+plotW    = Math.max(600, visibleIndices.length * cellW + 280)
+leftMarg = Math.min(280, Math.max(160,
+             Math.max(...uniqueVariants.map(s => s.length)) * 6))
+```
+
+```{ojs}
+Plot.plot({
+  width:        plotW,
+  height:       plotH,
+  marginLeft:   leftMarg,
+  marginBottom: 110,
+  marginRight:  80,
+  style: { background: "#fafafa", fontFamily: "system-ui, sans-serif", fontSize: "11px" },
+
+  color: {
+    type:    "diverging",
+    scheme:  "RdBu",
+    pivot:   0,
+    domain:  [-0.02, 0.02],
+    legend:  true,
+    label:   "Effect size (β)",
+    reverse: true    // red = positive (higher IS)
+  },
+
+  x: {
+    domain:     visibleIndices,
+    tickRotate: -55,
+    label:      "Insulin Sensitivity Index",
+    labelAnchor:"right"
+  },
+
+  y: {
+    domain:  uniqueVariants,
+    label:   "Gene – Variant – Risk allele",
+    tickSize: 0
+  },
+
+  marks: [
+    // Main heatmap cells
+    Plot.cell(filtered, {
+      x:     "is_index",
+      y:     "gene_snp_ra",
+      fill:  d => +d.beta,
+      title: d => [
+        `Gene:        ${d.nearest_gene}`,
+        `Variant:     ${d.index_variant}`,
+        `Risk allele: ${d.t_2_d_risk_allele}`,
+        `IS Index:    ${d.is_index}  (${d.index_group})`,
+        `β =          ${(+d.beta).toFixed(5)}`,
+        `p =          ${(+d.pvalue).toExponential(3)}`
+      ].join("\n"),
+      stroke:      "#e0e0e0",
+      strokeWidth: 0.4,
+      rx: 1
+    }),
+
+    // Black border for nominally significant (p < 0.05)
+    sigHighlight
+      ? Plot.cell(filtered.filter(d => +d.pvalue < 0.05), {
+          x:           "is_index",
+          y:           "gene_snp_ra",
+          stroke:      "#111",
+          strokeWidth: 1.5,
+          fill:        "none",
+          rx: 1
+        })
+      : Plot.dot([], {}),   // no-op when toggle is off
+
+    // White star for genome-wide / Bonferroni significant
+    Plot.text(filtered.filter(d => +d.pvalue < 1e-4), {
+      x:          "is_index",
+      y:          "gene_snp_ra",
+      text:       () => "✶",
+      fill:       "white",
+      fontSize:   9,
+      frameAnchor:"middle"
+    })
+  ]
+})
+```
+
+### Data Table
+
+```{ojs}
+Inputs.table(filtered, {
+  columns: [
+    "nearest_gene", "index_variant", "t_2_d_risk_allele",
+    "is_index", "index_group", "beta", "pvalue"
+  ],
+  header: {
+    nearest_gene:     "Gene",
+    index_variant:    "Variant (rsID)",
+    t_2_d_risk_allele:"Risk Allele",
+    is_index:         "IS Index",
+    index_group:      "Index Group",
+    beta:             "β (Effect Size)",
+    pvalue:           "P-value"
+  },
+  format: {
+    beta:   x => (+x).toFixed(5),
+    pvalue: x => (+x).toExponential(3)
+  },
+  sort:    "pvalue",
+  reverse: false,
+  rows:    25
+})
+```
+
+## Gene Explorer {.tabset}
+
+### By Gene – top associations
+
+```{ojs}
+//| output: false
+// For each gene, compute best p-value across all indices and analyses
+d3 = require("d3-array@3")
+
+// Roll up to gene × is_index level: pick min pvalue, mean beta
+geneRollup = d3.rollups(
+  filtered,
+  v => ({
+    min_pvalue: d3.min(v, d => +d.pvalue),
+    mean_beta:  d3.mean(v, d => +d.beta),
+    n_sig:      v.filter(d => +d.pvalue < 0.05).length,
+    n_variants: new Set(v.map(d => d.gene_snp_ra)).size
+  }),
+  d => d.nearest_gene,
+  d => d.is_index
+).flatMap(([gene, indices]) =>
+  indices.map(([is_index, stats]) => ({
+    nearest_gene: gene,
+    is_index,
+    ...stats
+  }))
+)
+
+uniqueGenes = [...new Set(geneRollup.map(d => d.nearest_gene))]
+  .sort((a, b) => {
+    const minA = Math.min(...geneRollup.filter(d => d.nearest_gene===a).map(d=>d.min_pvalue))
+    const minB = Math.min(...geneRollup.filter(d => d.nearest_gene===b).map(d=>d.min_pvalue))
+    return minA - minB
+  })
+  .slice(0, 80)   // cap at 80 genes for performance
+
+geneRollupFiltered = geneRollup.filter(d => uniqueGenes.includes(d.nearest_gene))
+
+geneH  = Math.max(400, uniqueGenes.length * 16 + 120)
+geneW  = Math.max(600, visibleIndices.length * cellW + 280)
+geneLM = Math.min(200, Math.max(80, Math.max(...uniqueGenes.map(s=>s.length)) * 7))
+```
+
+```{ojs}
+Plot.plot({
+  width:        geneW,
+  height:       geneH,
+  marginLeft:   geneLM,
+  marginBottom: 110,
+  marginRight:  80,
+  style:        { background: "#fafafa", fontFamily: "system-ui, sans-serif", fontSize: "11px" },
+
+  color: {
+    type:    "diverging",
+    scheme:  "RdBu",
+    pivot:   0,
+    domain:  [-0.02, 0.02],
+    legend:  true,
+    label:   "Mean β",
+    reverse: true
+  },
+
+  x: {
+    domain:     visibleIndices,
+    tickRotate: -55,
+    label:      "Insulin Sensitivity Index",
+    labelAnchor:"right"
+  },
+
+  y: {
+    domain: uniqueGenes,
+    label:  "Gene (top 80 by min p-value)",
+    tickSize: 0
+  },
+
+  marks: [
+    Plot.cell(geneRollupFiltered, {
+      x:     "is_index",
+      y:     "nearest_gene",
+      fill:  d => d.mean_beta,
+      title: d => [
+        `Gene:       ${d.nearest_gene}`,
+        `IS Index:   ${d.is_index}`,
+        `Mean β:     ${d.mean_beta.toFixed(5)}`,
+        `Min p:      ${d.min_pvalue.toExponential(3)}`,
+        `Sig. assoc: ${d.n_sig}`,
+        `Variants:   ${d.n_variants}`
+      ].join("\n"),
+      stroke:      "#e0e0e0",
+      strokeWidth: 0.4,
+      rx: 1
+    }),
+    Plot.cell(geneRollupFiltered.filter(d => d.min_pvalue < 0.05), {
+      x:           "is_index",
+      y:           "nearest_gene",
+      stroke:      "#111",
+      strokeWidth: 1.2,
+      fill:        "none",
+      rx: 1
+    })
+  ]
+})
+```
+
+### Gene Summary Table
+
+```{ojs}
+geneSummary = d3.rollups(
+  filtered,
+  v => ({
+    n_variants:   new Set(v.map(d => d.gene_snp_ra)).size,
+    n_sig_assoc:  v.filter(d => +d.pvalue < 0.05).length,
+    best_pvalue:  d3.min(v, d => +d.pvalue),
+    best_index:   v.reduce((a, b) => +a.pvalue < +b.pvalue ? a : b).is_index,
+    max_abs_beta: d3.max(v, d => Math.abs(+d.beta))
+  }),
+  d => d.nearest_gene
+).map(([gene, stats]) => ({ gene, ...stats }))
+  .sort((a, b) => a.best_pvalue - b.best_pvalue)
+
+Inputs.table(geneSummary, {
+  columns: ["gene", "n_variants", "n_sig_assoc", "best_pvalue", "best_index", "max_abs_beta"],
+  header: {
+    gene:         "Gene",
+    n_variants:   "# Variants",
+    n_sig_assoc:  "Sig. Assoc. (p<0.05)",
+    best_pvalue:  "Best P-value",
+    best_index:   "Best IS Index",
+    max_abs_beta: "Max |β|"
+  },
+  format: {
+    best_pvalue:  x => x.toExponential(3),
+    max_abs_beta: x => x.toFixed(5)
+  },
+  sort:    "best_pvalue",
+  reverse: false,
+  rows:    25
+})
+```

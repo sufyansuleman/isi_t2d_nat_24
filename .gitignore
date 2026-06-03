@@ -1,0 +1,28 @@
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# renv
+renv/library/
+renv/staging/
+
+# Quarto build artefacts
+/.quarto/
+_freeze/
+_site/
+
+# Data files – do NOT commit large TSV result files.
+# Put real association files in data/ locally; they are excluded here.
+# Commit only data/generate_sample.R (the generator script).
+data/*.txt
+data/*.tsv
+data/*.csv
+
+# Exception: allow the sample generator script
+!data/generate_sample.R
+
+# OS
+.DS_Store
+Thumbs.db
