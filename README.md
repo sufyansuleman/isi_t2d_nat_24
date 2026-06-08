@@ -1,6 +1,6 @@
 # ISI-T2D Association Browser
 
-**Interactive supplementary data browser for:**
+**Interactive data browser for T2D genetic variants and thier associaiton with insulin sensitivity indices:**
 > Suzuki et al. *Genetic drivers of heterogeneity in type 2 diabetes pathophysiology.* **Nature** (2024).
 
 **Live browser → https://sufyansuleman.github.io/isi_t2d_nat_24/**
@@ -51,46 +51,10 @@ PM = (β_total − β_direct) / |β_total| × 100, where β_total is the unadjus
 
 ---
 
-## Repository structure
+## Citations
 
-```
-isi_t2d_nat_24/
-├── index.qmd           # Main Quarto source — all interactive tabs (OJS + Observable Plot)
-├── _quarto.yml         # Site config: output to docs/, theme cosmo, body-width 1400px
-├── www/
-│   └── custom.css      # Page layout and control panel styles
-├── R/
-│   ├── load_data.R     # Loads and harmonises the TSV association files
-│   └── constants.R     # IS index order and groupings
-├── docs/               # Rendered static site (served by GitHub Pages)
-│   └── index.html
-└── data/               # Association TSVs — NOT committed (see note below)
-```
-
-> **Data files** (`data/*.txt`) contain unpublished association statistics and are excluded from this repository via `.gitignore`. The rendered `docs/index.html` embeds all necessary data at build time via Quarto's `ojs_define()`.
-
----
-
-## Technical stack
-
-- **[Quarto](https://quarto.org/)** — renders `index.qmd` to static HTML in `docs/`
-- **[Observable JS](https://observablehq.com/@observablehq/inputs)** + **[Observable Plot](https://observablehq.com/plot/)** — all interactivity is client-side; no server required
-- **[GitHub Pages](https://pages.github.com/)** — serves `docs/` from the `main` branch
-- **R** (`dplyr`, `readr`, `here`) — data loading at render time only
-
-To rebuild the site locally:
-
-```r
-# In RStudio or an R terminal at the project root
-quarto::quarto_render("index.qmd")
-```
-
-The rendered `docs/index.html` can then be previewed locally or pushed to update the live site.
-
----
-
-## Citation
-
-If you use data or visualisations from this browser, please cite:
+If you use data or visualisations from this browser, please cite both papers:
 
 > Suzuki K, Hatzikotoulas K, Southam L, et al. *Genetic drivers of heterogeneity in type 2 diabetes pathophysiology.* **Nature** 627, 347–357 (2024). https://doi.org/10.1038/s41586-024-07019-6
+
+> Suleman S, Ängquist L, Linneberg A, Hansen T, Grarup N. *Exploring the genetic intersection between obesity-associated genetic variants and insulin sensitivity indices.* **Scientific Reports** 15, 15761 (2025). https://doi.org/10.1038/s41598-025-98507-w
