@@ -1,11 +1,13 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - "index.qmd"   # only the static OJS page; dashboard.Rmd is a Shiny app, not built here
 
 website:
-  title: "ISI-T2D Association Browser"
+  title: "T2D Risk × Insulin Sensitivity Browser"
   description: "Interactive browser for T2D genetic associations with insulin sensitivity indices"
-  repo-url: https://github.com/USERNAME/isi_t2d_nat_24
+  repo-url: https://github.com/sufyansuleman/isi_t2d_nat_24
   repo-actions: [issue]
   page-navigation: true
 

@@ -8,21 +8,31 @@
 renv/library/
 renv/staging/
 
+# rsconnect deployment metadata (created by deploy.R / shinyapps.io)
+rsconnect/
+
+# Local R environment (may contain private paths or tokens)
+.Renviron
+
 # Quarto build artefacts
 /.quarto/
 _freeze/
 _site/
 
-# Data files – do NOT commit large TSV result files.
-# Put real association files in data/ locally; they are excluded here.
-# Commit only data/generate_sample.R (the generator script).
+# Data files — kept local, not committed to git.
+# For GitHub Pages: data is embedded in docs/index.html at render time (ojs_define).
+# For shinyapps.io: run deploy.R locally; it bundles data directly from disk.
 data/*.txt
 data/*.tsv
 data/*.csv
 
-# Exception: allow the sample generator script
-!data/generate_sample.R
-
 # OS
 .DS_Store
 Thumbs.db
+
+# Editor / AI assistant session data
+.continue/
+.claude/
+
+# Runtime logs
+*.log

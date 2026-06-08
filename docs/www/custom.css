@@ -10,7 +10,7 @@
 
 /* ── Controls card (vertical stack, fixed width) ─────────────────────────── */
 .left-column {
-  flex:          0 0 340px;
+  flex:          0 0 900px;
   display:       flex;
   flex-direction: column;
   gap:           0.75rem;
@@ -32,9 +32,9 @@
 }
 .controls-card > div:last-child { margin-bottom: 0; }
 
-/* Bigger, more legible labels */
+/* Bigger, more legible labels — targets Shiny's .control-label and plain <label> */
 .controls-card label,
-.controls-card .observablehq--label {
+.controls-card .control-label {
   font-size:   0.88rem;
   font-weight: 700;
   color:       #2c3e50;
@@ -43,7 +43,8 @@
 }
 
 /* Wider, taller text input */
-.controls-card input[type="text"] {
+.controls-card input[type="text"],
+.controls-card .form-control {
   width:       100%;
   font-size:   0.92rem;
   padding:     6px 9px;
@@ -58,24 +59,22 @@
   cursor:     pointer;
 }
 
-/* Radio / checkbox options — bigger hit area */
+/* Radio / checkbox options — bigger hit area (Shiny Bootstrap classes) */
 .controls-card input[type="radio"],
 .controls-card input[type="checkbox"] {
   width:  15px;
   height: 15px;
   cursor: pointer;
 }
-.controls-card .observablehq--radio-option,
-.controls-card .observablehq--checkbox-option {
+.controls-card .radio label,
+.controls-card .checkbox label {
   font-size: 0.88rem;
-  gap:       6px;
-  padding:   2px 0;
+  padding-left: 22px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
-
-/* Toggle (sigHighlight) */
-.controls-card input[type="checkbox"][role="switch"] {
-  width: 2.5em;
-  height: 1.3em;
+.controls-card .shiny-input-container {
+  width: 100% !important;
 }
 
 /* ── Stats card ──────────────────────────────────────────────────────────── */
@@ -179,7 +178,7 @@
 }
 
 /* ── Responsive collapse ─────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .top-panels { flex-wrap: wrap; }
   .left-column { flex: 1 1 100%; }
   .citation-card { flex: 1 1 100%; }
@@ -214,4 +213,35 @@ table.dataTable tbody tr:hover {
   height: 26px;
   font-size: 0.82rem;
 }
+/* ── Plotly / heatmap responsive width fix ───────────────────────────────── */
 
+/* Make Plotly outputs fill the available dashboard panel */
+.html-widget,
+.plotly,
+.plot-container,
+.svg-container,
+.js-plotly-plot,
+.js-plotly-plot .plotly,
+.js-plotly-plot .svg-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Flexdashboard chart containers should not shrink the plot */
+.chart-wrapper,
+.chart-stage,
+.chart-shim {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Avoid hidden width constraints inside panels */
+.section.level3,
+.section.level2 {
+  width: 100% !important;
+}
+
+/* Useful if Plotly keeps old calculated dimensions */
+.plotly.html-widget {
+  width: 100% !important;
+}

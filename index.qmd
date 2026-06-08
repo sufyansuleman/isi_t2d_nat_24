@@ -1,6 +1,6 @@
 ---
-title: "ISI\u2013T2D Pathophysiology Browser"
-subtitle: "Insulin sensitivity associations of T2D GWAS risk variants \u2014 direction of effect across 23 indices"
+title: "T2D Risk Alleles and Insulin Sensitivity \u2014 Association Browser"
+subtitle: "Effect sizes for T2D GWAS risk variants (Suzuki et al., *Nature* 2024) across 23 fasting and OGTT-derived insulin sensitivity indices, BMI-adjusted and unadjusted"
 execute:
   echo: false
   warning: false
@@ -149,8 +149,8 @@ visibleIndices = IS_INDEX_ORDER.filter(idx => {
 
 cellH    = uniqueVariants.length <= 50 ? 18 : uniqueVariants.length <= 200 ? 12 : 8
 plotH    = Math.max(400, uniqueVariants.length * cellH + 140)
-cellW    = 28
-plotW    = Math.max(600, visibleIndices.length * cellW + 280)
+cellW    = 36
+plotW    = Math.max(width, visibleIndices.length * cellW + 280)
 leftMarg = Math.min(280, Math.max(160,
              Math.max(...uniqueVariants.map(s => s.length)) * 6))
 ```
@@ -300,7 +300,7 @@ uniqueGenes = [...new Set(geneRollup.map(d => d.nearest_gene))]
 geneRollupFiltered = geneRollup.filter(d => uniqueGenes.includes(d.nearest_gene))
 
 geneH  = Math.max(400, uniqueGenes.length * 16 + 120)
-geneW  = Math.max(600, visibleIndices.length * cellW + 280)
+geneW  = Math.max(width, visibleIndices.length * cellW + 280)
 geneLM = Math.min(200, Math.max(80, Math.max(...uniqueGenes.map(s=>s.length)) * 7))
 ```
 

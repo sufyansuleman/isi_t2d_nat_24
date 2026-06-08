@@ -2,9 +2,10 @@ name: Deploy Shiny dashboard to shinyapps.io
 
 # ── Triggers ──────────────────────────────────────────────────────────────────
 on:
-  push:
-    branches: [main]          # auto-deploy on every push to main
-  workflow_dispatch:           # allow manual re-deploy from the GitHub Actions UI
+  workflow_dispatch:   # trigger manually from GitHub Actions UI once secrets are configured
+  # Uncomment the block below to auto-deploy on every push to main:
+  # push:
+  #   branches: [main]
 
 # ── Job ───────────────────────────────────────────────────────────────────────
 jobs:
@@ -45,8 +46,10 @@ jobs:
           )
           install.packages(pkgs, repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")
 
-      # 5. (Optional) Download data files if you host them externally.
-      #    Comment this step out if data is committed to the repo.
+      # 5. Data files are NOT committed to the repo (kept local/private).
+      #    This CI workflow therefore cannot bundle the Shiny app automatically.
+      #    → Use deploy.R from RStudio instead (it reads data from your local disk).
+      #    If you later host data externally (Zenodo, S3, etc.), uncomment and adapt:
       #
       # - name: Download association data
       #   run: |

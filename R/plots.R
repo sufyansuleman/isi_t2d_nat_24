@@ -15,12 +15,17 @@ source(here::here("R/constants.R"), local = FALSE)
 
 # Standard plotly config applied to every chart
 .cfg <- function(p) {
-  p %>% plotly::config(
-    scrollZoom             = TRUE,
-    displaylogo            = FALSE,
-    modeBarButtonsToRemove = list("lasso2d", "select2d", "autoScale2d"),
-    toImageButtonOptions   = list(format = "svg", width = 1400, height = 900)
-  )
+  p %>%
+    plotly::layout(
+      autosize = TRUE
+    ) %>%
+    plotly::config(
+      responsive             = TRUE,
+      scrollZoom             = TRUE,
+      displaylogo            = FALSE,
+      modeBarButtonsToRemove = list("lasso2d", "select2d", "autoScale2d"),
+      toImageButtonOptions   = list(format = "svg", width = 1400, height = 900)
+    )
 }
 
 # Shared layout defaults
@@ -82,7 +87,7 @@ source(here::here("R/constants.R"), local = FALSE)
 #' @param min_h    Minimum plot height in pixels (auto-expanded for many rows).
 plot_heatmap <- function(df, min_h = 550) {
   if (is.null(df) || nrow(df) == 0)
-    return(.empty_plot("No variants match the current filters"))
+    return(.empty_plot("No variants match the current filters") %>% .cfg())
 
   var_ord <- .variant_order(df)
   n_var   <- length(var_ord)
@@ -94,26 +99,30 @@ plot_heatmap <- function(df, min_h = 550) {
     dplyr::mutate(
       gene_snp_ra = factor(gene_snp_ra, levels = var_ord),
       is_index    = factor(is_index,    levels = IS_INDEX_ORDER),
-      sig_label   = dplyr::if_else(pvalue < 0.001, " ★★", dplyr::if_else(pvalue < 0.05, " ★", ""))
+      sig_label   = dplyr::if_else(
+        pvalue < 0.001,
+        " ★★",
+        dplyr::if_else(pvalue < 0.05, " ★", "")
+      )
     )
 
-  p <- plotly::plot_ly(
-    data      = df,
-    x         = ~is_index,
-    y         = ~gene_snp_ra,
-    z         = ~beta,
-    type      = "heatmap",
+  plotly::plot_ly(
+    data       = df,
+    x          = ~is_index,
+    y          = ~gene_snp_ra,
+    z          = ~beta,
+    type       = "heatmap",
     colorscale = BETA_COLORSCALE,
-    zmin      = -zlim,
-    zmax      =  zlim,
-    colorbar  = list(
+    zmin       = -zlim,
+    zmax       =  zlim,
+    colorbar   = list(
       title      = "β",
       thickness  = 14,
       len        = 0.55,
       tickformat = ".4f",
-      tickvals   = c(-zlim, -zlim/2, 0, zlim/2, zlim)
+      tickvals   = c(-zlim, -zlim / 2, 0, zlim / 2, zlim)
     ),
-    text      = ~paste0(
+    text = ~paste0(
       "<b>", gene_snp_ra, "</b>", sig_label, "<br>",
       "IS index:    ", is_index,                        "<br>",
       "Group:       ", index_group,                     "<br>",
@@ -123,21 +132,30 @@ plot_heatmap <- function(df, min_h = 550) {
     hoverinfo = "text"
   ) %>%
     plotly::layout(
-      xaxis  = list(
+      autosize = TRUE,
+
+      xaxis = list(
         title         = "",
         tickangle     = -48,
         tickfont      = list(size = 9),
         categoryorder = "array",
-        categoryarray = as.character(IS_INDEX_ORDER)
+        categoryarray = as.character(IS_INDEX_ORDER),
+        automargin    = TRUE,
+        fixedrange    = FALSE
       ),
-      yaxis  = list(
-        title    = "",
-        tickfont = list(size = 8),
-        autorange = "reversed"
+
+      yaxis = list(
+        title      = "",
+        tickfont   = list(size = 8),
+        autorange  = "reversed",
+        automargin = TRUE,
+        fixedrange = FALSE
       ),
-      height  = ph,
-      margin  = list(l = lm, b = 120, r = 70, t = 35),
+
+      height   = ph,
+      margin   = list(l = lm, b = 120, r = 40, t = 35),
       dragmode = "pan",
+
       paper_bgcolor = "#fafafa",
       plot_bgcolor  = "#ffffff"
     ) %>%
@@ -151,7 +169,7 @@ plot_heatmap <- function(df, min_h = 550) {
 #' Heatmap of (β_no_bmi − β_bmi): positive = BMI attenuates, negative = amplifies.
 plot_bmi_diff_heatmap <- function(df_joined, min_h = 550) {
   if (is.null(df_joined) || nrow(df_joined) == 0)
-    return(.empty_plot("No overlapping variants across both analyses"))
+    return(.empty_plot("No overlapping variants across both analyses") %>% .cfg())
 
   df <- df_joined %>%
     dplyr::mutate(
@@ -172,42 +190,60 @@ plot_bmi_diff_heatmap <- function(df_joined, min_h = 550) {
     )
 
   plotly::plot_ly(
-    data      = df,
-    x         = ~is_index,
-    y         = ~gene_snp_ra,
-    z         = ~beta_diff,
-    type      = "heatmap",
+    data       = df,
+    x          = ~is_index,
+    y          = ~gene_snp_ra,
+    z          = ~beta_diff,
+    type       = "heatmap",
     colorscale = ATTENUATION_COLORSCALE,
-    zmin      = -zlim,
-    zmax      =  zlim,
-    colorbar  = list(
-      title     = "β diff<br>(no-BMI − BMI)",
-      thickness = 14, len = 0.55,
+    zmin       = -zlim,
+    zmax       =  zlim,
+    colorbar   = list(
+      title      = "β diff<br>(no-BMI − BMI)",
+      thickness  = 14,
+      len        = 0.55,
       tickformat = ".4f"
     ),
     text = ~paste0(
       "<b>", gene_snp_ra, "</b><br>",
-      "IS index:        ", is_index,                                   "<br>",
-      "β (BMI-adj):     ", sprintf("%.5f", beta_bmi),                  "<br>",
-      "β (no-BMI):      ", sprintf("%.5f", beta_no_bmi),               "<br>",
-      "Δβ (no-BMI−BMI): ", sprintf("%.5f", beta_diff),                 "<br>",
+      "IS index:        ", is_index,                     "<br>",
+      "β (BMI-adj):     ", sprintf("%.5f", beta_bmi),    "<br>",
+      "β (no-BMI):      ", sprintf("%.5f", beta_no_bmi), "<br>",
+      "Δβ (no-BMI−BMI): ", sprintf("%.5f", beta_diff),   "<br>",
       "% change:        ", sprintf("%.1f%%", pct_change)
     ),
     hoverinfo = "text"
   ) %>%
     plotly::layout(
-      xaxis   = list(title = "", tickangle = -48, tickfont = list(size = 9),
-                     categoryorder = "array", categoryarray = as.character(IS_INDEX_ORDER)),
-      yaxis   = list(title = "", tickfont = list(size = 8), autorange = "reversed"),
-      height  = ph,
-      margin  = list(l = lm, b = 120, r = 70, t = 35),
+      autosize = TRUE,
+
+      xaxis = list(
+        title         = "",
+        tickangle     = -48,
+        tickfont      = list(size = 9),
+        categoryorder = "array",
+        categoryarray = as.character(IS_INDEX_ORDER),
+        automargin    = TRUE,
+        fixedrange    = FALSE
+      ),
+
+      yaxis = list(
+        title      = "",
+        tickfont   = list(size = 8),
+        autorange  = "reversed",
+        automargin = TRUE,
+        fixedrange = FALSE
+      ),
+
+      height   = ph,
+      margin   = list(l = lm, b = 120, r = 40, t = 35),
       dragmode = "pan",
+
       paper_bgcolor = "#fafafa",
       plot_bgcolor  = "#ffffff"
     ) %>%
     .cfg()
 }
-
 # ─────────────────────────────────────────────────────────────────────────────
 # 3.  VOLCANO PLOT  (single index or 3×N facet grid)
 # ─────────────────────────────────────────────────────────────────────────────

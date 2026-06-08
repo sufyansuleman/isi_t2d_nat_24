@@ -46,7 +46,7 @@ all_variants <- sort(unique(c(dat_bmi$gene_snp_ra, dat_no_bmi$gene_snp_ra)))
 ```
 
 
-Sidebar {.sidebar data-width=265}
+Sidebar {.sidebar data-width=300}
 =====================================
 
 **Analysis & Filters**
@@ -154,9 +154,7 @@ Heatmap {data-icon="fa-th"}
 ### Association Heatmap {.no-title}
 
 ```{r}
-plotlyOutput("heatmap_main", height = "100%")
-
-output$heatmap_main <- renderPlotly({ plot_heatmap(fd()) })
+renderPlotly({ plot_heatmap(fd()) })
 ```
 
 
@@ -169,8 +167,7 @@ Column {data-width=50%}
 ### BMI-Adjusted heatmap
 
 ```{r}
-plotlyOutput("hmap_bmi", height = "100%")
-output$hmap_bmi <- renderPlotly({
+renderPlotly({
   sub <- dat_bmi %>%
     dplyr::semi_join(fj(), by = c("gene_snp_ra","is_index"))
   plot_heatmap(sub, min_h = 420)
@@ -180,8 +177,7 @@ output$hmap_bmi <- renderPlotly({
 ### BMI-Unadjusted heatmap
 
 ```{r}
-plotlyOutput("hmap_nobmi", height = "100%")
-output$hmap_nobmi <- renderPlotly({
+renderPlotly({
   sub <- dat_no_bmi %>%
     dplyr::semi_join(fj(), by = c("gene_snp_ra","is_index"))
   plot_heatmap(sub, min_h = 420)
@@ -194,15 +190,13 @@ Column {data-width=50%}
 ### Δβ map  (no-BMI − BMI-adj)  — purple = BMI attenuates, green = BMI amplifies
 
 ```{r}
-plotlyOutput("hmap_diff", height = "100%")
-output$hmap_diff <- renderPlotly({ plot_bmi_diff_heatmap(fj(), min_h = 420) })
+renderPlotly({ plot_bmi_diff_heatmap(fj(), min_h = 420) })
 ```
 
 ### β scatter  (BMI-adj vs no-BMI)
 
 ```{r}
-plotlyOutput("scatter_bmi", height = "100%")
-output$scatter_bmi <- renderPlotly({ plot_beta_scatter(fj()) })
+renderPlotly({ plot_beta_scatter(fj()) })
 ```
 
 
@@ -229,8 +223,7 @@ Column
 ### Volcano Plot {.no-title}
 
 ```{r}
-plotlyOutput("volcano_main", height = "100%")
-output$volcano_main <- renderPlotly({ plot_volcano(fd(), input$volcano_idx) })
+renderPlotly({ plot_volcano(fd(), input$volcano_idx) })
 ```
 
 
@@ -251,7 +244,7 @@ renderUI({
   )
 })
 
-p("Shows β across all 21 IS indices for the selected variant.
+p("Shows β across all 23 IS indices for the selected variant.
   Both analyses are overlaid for direct comparison.",
   style = "font-size:0.75rem; color:#777; margin-top:0.5rem")
 ```
@@ -262,8 +255,7 @@ Column
 ### Effect Profile — both analyses overlaid {.no-title}
 
 ```{r}
-plotlyOutput("forest_main", height = "100%")
-output$forest_main <- renderPlotly({
+renderPlotly({
   var <- input$forest_var %||% ""
   if (nchar(trimws(var)) == 0)
     return(.empty_plot("Select a variant in the sidebar dropdown"))
@@ -287,8 +279,7 @@ Column {data-width=50%}
 ### % β mediated by BMI — top variants
 
 ```{r}
-plotlyOutput("attenuation_bar", height = "100%")
-output$attenuation_bar <- renderPlotly({ plot_attenuation_bar(fj()) })
+renderPlotly({ plot_attenuation_bar(fj()) })
 ```
 
 Column {data-width=50%}
@@ -297,8 +288,7 @@ Column {data-width=50%}
 ### Parallel coordinates — all variants × IS indices
 
 ```{r}
-plotlyOutput("parallel_main", height = "100%")
-output$parallel_main <- renderPlotly({ plot_parallel(fd()) })
+renderPlotly({ plot_parallel(fd()) })
 ```
 
 
@@ -401,8 +391,7 @@ Column {data-width=55%}
 ### Top genes by number of significant associations (p < 0.05)
 
 ```{r}
-plotlyOutput("gene_bar", height = "100%")
-output$gene_bar <- renderPlotly({ plot_gene_summary(fd()) })
+renderPlotly({ plot_gene_summary(fd()) })
 ```
 
 Column {data-width=45%}
@@ -411,6 +400,5 @@ Column {data-width=45%}
 ### β distribution per IS index
 
 ```{r}
-plotlyOutput("index_violin", height = "100%")
-output$index_violin <- renderPlotly({ plot_index_violin(fd()) })
+renderPlotly({ plot_index_violin(fd()) })
 ```
