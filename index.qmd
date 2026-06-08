@@ -29,6 +29,7 @@ Genetic variants identified in the largest genome-wide association study (GWAS) 
 ::: {.controls-card}
 
 ```{ojs}
+//| output: false
 viewof searchQuery = Inputs.text({
   label: "🔍 Search gene / rsID",
   placeholder: "e.g. KCNJ11 or rs5219",
@@ -37,6 +38,7 @@ viewof searchQuery = Inputs.text({
 ```
 
 ```{ojs}
+//| output: false
 viewof analysisType = Inputs.radio(
   ["BMI-Adjusted", "BMI-Unadjusted"],
   { label: "Analysis", value: "BMI-Adjusted" }
@@ -44,6 +46,7 @@ viewof analysisType = Inputs.radio(
 ```
 
 ```{ojs}
+//| output: false
 viewof indexGroups = Inputs.checkbox(
   ["Fasting", "OGTT,0-120", "OGTT,0-30-120"],
   {
@@ -54,6 +57,7 @@ viewof indexGroups = Inputs.checkbox(
 ```
 
 ```{ojs}
+//| output: false
 viewof pvalThresh = Inputs.range(
   [0, 1],
   { label: "Max p-value", value: 1, step: 0.01, format: x => x.toFixed(2) }
@@ -61,6 +65,7 @@ viewof pvalThresh = Inputs.range(
 ```
 
 ```{ojs}
+//| output: false
 viewof betaMin = Inputs.range(
   [0, 0.1],
   { label: "Min |β|", value: 0, step: 0.001, format: x => x.toFixed(3) }
@@ -68,10 +73,27 @@ viewof betaMin = Inputs.range(
 ```
 
 ```{ojs}
+//| output: false
 viewof sigHighlight = Inputs.toggle({
   label: "Highlight p < 0.05 (black border)",
   value: true
 })
+```
+
+```{ojs}
+html`<div style="
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 2.5rem;
+  row-gap: 0.5rem;
+">
+  <div style="min-width:0; overflow:hidden">${viewof searchQuery}</div>
+  <div style="min-width:0; overflow:hidden">${viewof analysisType}</div>
+  <div style="min-width:0; overflow:hidden">${viewof indexGroups}</div>
+  <div style="min-width:0; overflow:hidden">${viewof pvalThresh}</div>
+  <div style="min-width:0; overflow:hidden">${viewof betaMin}</div>
+  <div style="min-width:0; overflow:hidden">${viewof sigHighlight}</div>
+</div>`
 ```
 
 :::

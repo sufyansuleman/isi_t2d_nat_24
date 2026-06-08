@@ -16,71 +16,34 @@
   gap:           0.75rem;
 }
 
-/* ── Controls card — 2-column grid so each input gets ~half width ───────────── */
+/* ── Controls card ─────────────────────────────────────────────────────────── */
+/* The 2-column grid is rendered by the OJS html` template inside the card.    */
+/* CSS here only provides visual styling — no layout overrides needed.          */
 .controls-card {
-  flex:                  unset;
-  display:               grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap:            2.5rem;
-  row-gap:               0.55rem;
-  align-items:           start;
-  background:            #f4f6fb;
-  border:                1px solid #c5cfe0;
-  border-radius:         10px;
-  padding:               1rem 1.5rem 1.1rem;
-  box-shadow:            0 2px 8px rgba(0,0,0,.08);
+  flex:          unset;
+  background:    #f4f6fb;
+  border:        1px solid #c5cfe0;
+  border-radius: 10px;
+  padding:       1rem 1.5rem 1.1rem;
+  box-shadow:    0 2px 8px rgba(0,0,0,.08);
 }
 
-/* Observable Inputs: fix label text so it doesn't wrap in narrow cell */
-.controls-card label,
-.controls-card form {
-  width: 100%;
+/* Tighten the OJS cell wrapper that holds the grid div */
+.controls-card > .cell { margin: 0; }
+.controls-card > .cell > .observablehq { overflow: visible !important; }
+
+/* Bold label text for all Observable Inputs in the panel */
+.controls-card form  > span,
+.controls-card label > span:first-child {
+  font-weight: 700;
+  font-size:   0.84rem;
+  color:       #2c3e50;
 }
 
-/* Nudge Observable's internal label span to stay on one line */
-.controls-card label > span:first-child,
-.controls-card form  > label:first-child {
-  white-space:  nowrap;
-  font-weight:  700 !important;
-  color:        #2c3e50 !important;
-  font-size:    0.84rem !important;
-  min-width:    0 !important;
-}
-
-/* Wider, taller text input */
-.controls-card input[type="text"],
-.controls-card .form-control {
-  width:       100%;
-  font-size:   0.92rem;
-  padding:     6px 9px;
-  border:      1px solid #aab4c8;
-  border-radius: 5px;
-}
-
-/* Full-width range sliders */
-.controls-card input[type="range"] {
-  width:      100%;
-  height:     6px;
-  cursor:     pointer;
-}
-
-/* Radio / checkbox options — bigger hit area (Shiny Bootstrap classes) */
+/* Cursor on interactive inputs */
+.controls-card input[type="range"]    { cursor: pointer; }
 .controls-card input[type="radio"],
-.controls-card input[type="checkbox"] {
-  width:  15px;
-  height: 15px;
-  cursor: pointer;
-}
-.controls-card .radio label,
-.controls-card .checkbox label {
-  font-size: 0.88rem;
-  padding-left: 22px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-.controls-card .shiny-input-container {
-  width: 100% !important;
-}
+.controls-card input[type="checkbox"] { cursor: pointer; }
 
 /* ── Stats card ──────────────────────────────────────────────────────────── */
 .stats-card {
