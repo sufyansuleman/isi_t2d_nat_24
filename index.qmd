@@ -296,70 +296,10 @@ Inputs.table(filtered, {
 
 ## BMI Comparison
 
-*Shows only variants present in **both** analyses (inner join). Same filters apply.*
+*Per-variant comparison of BMI-adjusted (🔵 blue) vs BMI-unadjusted (🟠 orange) effect sizes across all IS indices.
+Connecting lines show the direction of change: **purple** = BMI attenuates the effect (β shrinks after adjustment); **green** = BMI amplifies it (β grows after adjustment). Δβ = unadjusted − adjusted. Larger dots = p < 0.05.*
 
-**BMI-Adjusted**
-
-```{ojs}
-Plot.plot({
-  width: jPlotW, height: jPlotH,
-  marginLeft: jLeftMarg, marginBottom: 110, marginRight: 80,
-  style: { background: "#fafafa", fontFamily: "system-ui, sans-serif", fontSize: "11px" },
-  color: { type: "diverging", scheme: "RdBu", pivot: 0, domain: [-0.02, 0.02],
-           legend: true, label: "β (BMI-adjusted)", reverse: true },
-  x: { domain: visibleIndices, tickRotate: -55, label: "Insulin Sensitivity Index", labelAnchor: "right" },
-  y: { domain: jVariants, label: "Gene – Variant – Risk allele", tickSize: 0 },
-  marks: [
-    Plot.cell(joinedFiltered, {
-      x: "is_index", y: "gene_snp_ra", fill: d => d.beta_bmi,
-      title: d => [
-        d.gene_snp_ra, d.is_index,
-        "β (adj) = " + d.beta_bmi.toFixed(5),
-        "p (adj) = " + d.pval_bmi.toExponential(3)
-      ].join("\n"),
-      stroke: "#e0e0e0", strokeWidth: 0.4, rx: 1
-    }),
-    Plot.cell(joinedFiltered.filter(d => d.pval_bmi < 0.05), {
-      x: "is_index", y: "gene_snp_ra", stroke: "#111", strokeWidth: 1.5, fill: "none", rx: 1
-    })
-  ]
-})
-```
-
-**BMI-Unadjusted**
-
-```{ojs}
-Plot.plot({
-  width: jPlotW, height: jPlotH,
-  marginLeft: jLeftMarg, marginBottom: 110, marginRight: 80,
-  style: { background: "#fafafa", fontFamily: "system-ui, sans-serif", fontSize: "11px" },
-  color: { type: "diverging", scheme: "RdBu", pivot: 0, domain: [-0.02, 0.02],
-           legend: true, label: "β (unadjusted)", reverse: true },
-  x: { domain: visibleIndices, tickRotate: -55, label: "Insulin Sensitivity Index", labelAnchor: "right" },
-  y: { domain: jVariants, label: "Gene – Variant – Risk allele", tickSize: 0 },
-  marks: [
-    Plot.cell(joinedFiltered, {
-      x: "is_index", y: "gene_snp_ra", fill: d => d.beta_no_bmi,
-      title: d => [
-        d.gene_snp_ra, d.is_index,
-        "β (unadj) = " + d.beta_no_bmi.toFixed(5),
-        "p (unadj) = " + d.pval_no_bmi.toExponential(3)
-      ].join("\n"),
-      stroke: "#e0e0e0", strokeWidth: 0.4, rx: 1
-    }),
-    Plot.cell(joinedFiltered.filter(d => d.pval_no_bmi < 0.05), {
-      x: "is_index", y: "gene_snp_ra", stroke: "#111", strokeWidth: 1.5, fill: "none", rx: 1
-    })
-  ]
-})
-```
-
----
-
-**Optional: compute Δβ for a specific variant**
-
-*Select a variant to see its BMI-adjusted vs unadjusted effect side by side across all IS indices.
-Purple connecting line = BMI attenuates the effect; green = BMI amplifies it.*
+*Only variants present in both analyses are shown. Use the search/filter panel on the left to narrow variants, then pick one below.*
 
 ```{ojs}
 viewof deltaSearch = Inputs.search(jVariants, {
@@ -378,8 +318,8 @@ viewof deltaVariant = Inputs.select(
 
 ```{ojs}
 {
-  if (!deltaVariant)
-    return html`<p style="color:#888;padding:1rem;">No variant selected.</p>`
+  if (!deltaVariant || jVariants.length === 0)
+    return html`<p style="color:#888;padding:1rem;">No variants match current filters — try relaxing p-value or β thresholds.</p>`
 
   const rows = joinedFiltered.filter(d => d.gene_snp_ra === deltaVariant)
   if (rows.length === 0)
@@ -393,8 +333,8 @@ viewof deltaVariant = Inputs.select(
 
   return Plot.plot({
     width,
-    height: Math.max(320, domain.length * 32 + 130),
-    marginLeft: 180, marginRight: 100, marginBottom: 50, marginTop: 30,
+    height: Math.max(340, domain.length * 34 + 130),
+    marginLeft: 180, marginRight: 110, marginBottom: 50, marginTop: 30,
     style: { fontSize: "11px" },
     color: {
       domain: ["BMI-Adjusted", "BMI-Unadjusted"],
@@ -413,163 +353,19 @@ viewof deltaVariant = Inputs.select(
       Plot.dot(paired, {
         x: "beta", y: "is_index", fill: "analysis",
         r: d => d.pvalue < 0.05 ? 9 : 6, opacity: 0.9,
-        title: d => d.is_index + "\n" + d.analysis +
-          "\nb = " + d.beta.toFixed(5) + "\np = " + d.pvalue.toExponential(3)
+        title: d => [
+          d.is_index,
+          d.analysis,
+          "β = " + d.beta.toFixed(5),
+          "p = " + d.pvalue.toExponential(3)
+        ].join("\n")
       }),
       Plot.text(rows, {
         x: d => (d.beta_bmi + d.beta_no_bmi) / 2,
         y: "is_index",
         text: d => "Δ=" + (d.beta_no_bmi - d.beta_bmi > 0 ? "+" : "") +
                    (d.beta_no_bmi - d.beta_bmi).toFixed(4),
-        dy: -11, fontSize: 8, fill: "#444"
-      })
-    ]
-  })
-}
-```
-
-## Volcano
-
-```{ojs}
-viewof volcanoIndex = Inputs.select(
-  ["All Indices", ...visibleIndices],
-  { label: "IS Index (All = 3-column grid)", value: "All Indices" }
-)
-```
-
-```{ojs}
-{
-  const vData = filtered.map(d => ({
-    ...d,
-    log10p: -Math.log10(+d.pvalue + 1e-300),
-    sig: +d.pvalue < 0.001 ? "p < 0.001" : +d.pvalue < 0.05 ? "p < 0.05" : "NS"
-  }))
-
-  const pal = { "p < 0.001": "#c0392b", "p < 0.05": "#e67e22", "NS": "#bdc3c7" }
-
-  if (volcanoIndex !== "All Indices") {
-    const sub = vData.filter(d => d.is_index === volcanoIndex)
-    return Plot.plot({
-      width, height: 500,
-      marginLeft: 60, marginBottom: 50, marginTop: 20, marginRight: 20,
-      style: { fontSize: "11px" },
-      color: { domain: Object.keys(pal), range: Object.values(pal), legend: true, label: "Significance" },
-      x: { label: "Effect size (β)", grid: true },
-      y: { label: "-log₁₀(p-value)", grid: true },
-      marks: [
-        Plot.dot(sub, {
-          x: d => +d.beta, y: "log10p", fill: "sig", r: 5, opacity: 0.8,
-          title: d => d.gene_snp_ra + "\nβ = " + (+d.beta).toFixed(5) + "\np = " + (+d.pvalue).toExponential(3)
-        }),
-        Plot.ruleX([0], { stroke: "#aaa", strokeWidth: 1.2 }),
-        Plot.ruleY([-Math.log10(0.05)],  { stroke: "#e67e22", strokeDasharray: "6,3", strokeWidth: 1.5 }),
-        Plot.ruleY([-Math.log10(0.001)], { stroke: "#c0392b", strokeDasharray: "3,3", strokeWidth: 1.5 }),
-        Plot.text(sub.filter(d => +d.pvalue < 1e-4), {
-          x: d => +d.beta, y: "log10p", text: "gene_snp_ra", dy: -8, fontSize: 8, fill: "#333"
-        })
-      ]
-    })
-  }
-
-  // All Indices: 3-column mini-plot grid
-  const nCols  = 3
-  const sw     = Math.max(220, Math.floor((width - 32) / nCols))
-  const grid   = html`<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:6px;">`
-  for (const idx of visibleIndices) {
-    const sub = vData.filter(d => d.is_index === idx)
-    grid.appendChild(html`<div style="border:1px solid #dde3ec;border-radius:6px;padding:4px;background:#fafafa;">
-      <div style="font-size:9.5px;font-weight:700;color:#2c3e50;padding:2px 4px;text-align:center;">${idx}</div>
-      ${Plot.plot({
-        width: sw - 10, height: 180,
-        marginLeft: 38, marginBottom: 26, marginTop: 4, marginRight: 6,
-        style: { fontSize: "8px" },
-        color: { domain: Object.keys(pal), range: Object.values(pal) },
-        x: { label: "β" },
-        y: { label: "-log₁₀p" },
-        marks: [
-          Plot.dot(sub, {
-            x: d => +d.beta, y: "log10p", fill: "sig", r: 2.5, opacity: 0.75,
-            title: d => d.gene_snp_ra + "\nβ=" + (+d.beta).toFixed(5) + "\np=" + (+d.pvalue).toExponential(3)
-          }),
-          Plot.ruleX([0], { stroke: "#ccc", strokeWidth: 1 }),
-          Plot.ruleY([-Math.log10(0.05)],  { stroke: "#e67e22", strokeDasharray: "4,3", strokeWidth: 1 }),
-          Plot.ruleY([-Math.log10(0.001)], { stroke: "#c0392b", strokeDasharray: "2,2", strokeWidth: 1 })
-        ]
-      })}
-    </div>`)
-  }
-  return grid
-}
-```
-
-## Effect Profile
-
-*Select a variant to see its effect size across all IS indices. Both analyses overlaid. Larger dots = p \< 0.05.*
-
-```{ojs}
-allVariantsList = [...new Set([
-  ...rawBmi.map(d => d.gene_snp_ra),
-  ...rawNoBmi.map(d => d.gene_snp_ra)
-])].sort()
-```
-
-```{ojs}
-viewof efpSearch = Inputs.search(allVariantsList, {
-  placeholder: "Type gene name or rsID to filter...",
-  label: "Filter variants"
-})
-```
-
-```{ojs}
-viewof efpVariant = Inputs.select(
-  efpSearch.length > 0 ? efpSearch : allVariantsList,
-  { label: "Select variant", value: (efpSearch.length > 0 ? efpSearch : allVariantsList)[0] }
-)
-```
-
-```{ojs}
-{
-  const bmiRows   = rawBmi.filter(d =>   d.gene_snp_ra === efpVariant && visibleIndices.includes(d.is_index))
-  const noBmiRows = rawNoBmi.filter(d =>  d.gene_snp_ra === efpVariant && visibleIndices.includes(d.is_index))
-  const efpData   = [
-    ...bmiRows.map(d =>   ({ ...d, beta: +d.beta, pvalue: +d.pvalue, analysis: "BMI-Adjusted"   })),
-    ...noBmiRows.map(d => ({ ...d, beta: +d.beta, pvalue: +d.pvalue, analysis: "BMI-Unadjusted" }))
-  ]
-  if (efpData.length === 0)
-    return html`<p style="color:#888;padding:1rem;">No data for selected variant.</p>`
-
-  return Plot.plot({
-    width,
-    height: Math.max(350, visibleIndices.length * 26 + 120),
-    marginLeft: 180, marginRight: 80, marginBottom: 50, marginTop: 20,
-    style: { fontSize: "11px" },
-    color: {
-      domain: ["BMI-Adjusted", "BMI-Unadjusted"],
-      range:  ["#2980b9",       "#e67e22"],
-      legend: true
-    },
-    x: { label: "Effect size (β)", grid: true },
-    y: { domain: visibleIndices.slice().reverse(), label: null, tickSize: 0 },
-    marks: [
-      Plot.ruleX([0], { stroke: "#bbb", strokeWidth: 1.5 }),
-      Plot.ruleY(efpData, {
-        x1: 0, x2: "beta", y: "is_index",
-        stroke: "analysis", strokeWidth: 3.5, strokeOpacity: 0.45
-      }),
-      Plot.dot(efpData, {
-        x: "beta", y: "is_index", fill: "analysis",
-        r: d => d.pvalue < 0.05 ? 11 : 7,
-        opacity: 0.9,
-        title: d => [
-          d.is_index + "  (" + d.index_group + ")",
-          "Analysis: " + d.analysis,
-          "β = " + d.beta.toFixed(5),
-          "p = " + d.pvalue.toExponential(3)
-        ].join("\n")
-      }),
-      Plot.text(efpData.filter(d => d.pvalue < 0.05), {
-        x: "beta", y: "is_index",
-        text: () => "*", dy: -1, fontSize: 11, fill: "#222"
+        dy: -12, fontSize: 8.5, fill: "#444", fontWeight: "600"
       })
     ]
   })
@@ -578,9 +374,10 @@ viewof efpVariant = Inputs.select(
 
 ## BMI Mediation
 
-*Proportion of total genetic effect mediated by BMI, using the Baron–Kenny formula:*
-*PM = (β\_total − β\_direct) / |β\_total| × 100. β\_total = unadjusted effect; β\_direct = BMI-adjusted effect.*
-*Only variants with |β\_total| ≥ 0.005 across ≥ 3 IS indices are included; individual PMs are clamped to ±300% before taking the median. Top 10 most attenuated and top 10 most amplified variants shown.*
+**How to read this chart:** Each bar shows the median % of a variant's genetic effect that is explained by BMI, computed across IS indices using the Baron–Kenny formula.
+**Purple (positive %)** = adjusting for BMI shrinks the effect — BMI mediates part of the association.
+**Green (negative %)** = the effect is *stronger* after BMI adjustment — the variant acts independently of BMI (or is suppressed by it).
+A value near **100%** means virtually the entire genetic effect operates through BMI; near **0%** means it is BMI-independent.
 
 ```{ojs}
 {
@@ -590,8 +387,6 @@ viewof efpVariant = Inputs.select(
   // Baron-Kenny proportion mediated: PM = (β_total − β_direct) / |β_total|
   // β_total  = beta_no_bmi (unadjusted = total effect)
   // β_direct = beta_bmi    (BMI-adjusted = direct effect)
-  // Threshold: |β_total| >= 0.005 to exclude near-zero denominators (suppression cases)
-  // Clamp each PM to ±300% before aggregation to prevent extreme outliers
   const all = d3.rollups(
     joinedFiltered.filter(d => Math.abs(d.beta_no_bmi) >= 0.005),
     v => {
@@ -616,7 +411,6 @@ viewof efpVariant = Inputs.select(
   if (all.length === 0)
     return html`<p style="color:#888;padding:1rem;">Insufficient data after filtering. Try relaxing filters.</p>`
 
-  // Top 10 most attenuated + top 10 most amplified
   const top10    = all.slice(0, 10)
   const bottom10 = all.slice(-10)
   const med = [...top10, ...bottom10]
@@ -625,9 +419,12 @@ viewof efpVariant = Inputs.select(
 
   const lm = Math.min(260, Math.max(150, d3.max(med, d => d.gene_snp_ra.length) * 6))
 
+  // Threshold: bars wider than 18% get white label inside; narrower get dark label outside
+  const INSIDE_THRESH = 18
+
   return Plot.plot({
     width,
-    height: Math.max(400, med.length * 24 + 130),
+    height: Math.max(420, med.length * 26 + 130),
     marginLeft: lm, marginRight: 90, marginBottom: 60,
     style: { fontSize: "11px" },
     color: {
@@ -635,28 +432,35 @@ viewof efpVariant = Inputs.select(
       range:  ["#8e44ad", "#27ae60"],
       legend: true
     },
-    x: { label: "Median proportion mediated by BMI (%)  —  (β total − β direct) / |β total| × 100", grid: true },
-    y: {
-      label: null, tickSize: 0,
-      domain: med.map(d => d.gene_snp_ra)
-    },
+    x: { label: "Median % of genetic effect mediated by BMI  (Baron–Kenny: (β unadj − β adj) / |β unadj| × 100)", grid: true },
+    y: { label: null, tickSize: 0, domain: med.map(d => d.gene_snp_ra) },
     marks: [
       Plot.ruleX([0],   { stroke: "#888", strokeWidth: 1.2 }),
-      Plot.ruleX([100], { stroke: "#aaa", strokeWidth: 1, strokeDasharray: "4,3" }),
+      Plot.ruleX([100], { stroke: "#bbb", strokeWidth: 1, strokeDasharray: "4,3" }),
       Plot.barX(med, {
         x: "median_pm", y: "gene_snp_ra",
         fill: d => d.median_pm > 0 ? "BMI attenuates" : "BMI amplifies",
         rx: 2,
         title: d => [
           d.gene_snp_ra,
-          "Median proportion mediated: " + d.median_pm.toFixed(1) + "%",
-          "Attenuated in: " + d.n_att + "/" + d.n_total + " IS indices"
+          "Median % mediated: " + d.median_pm.toFixed(1) + "%",
+          "BMI-attenuated in " + d.n_att + " of " + d.n_total + " IS indices"
         ].join("\n")
       }),
-      Plot.text(med, {
-        x: d => d.median_pm, y: "gene_snp_ra",
+      // Labels INSIDE wide bars (white, bold)
+      Plot.text(med.filter(d => Math.abs(d.median_pm) >= INSIDE_THRESH), {
+        x: d => d.median_pm / 2,
+        y: "gene_snp_ra",
         text: d => d.median_pm.toFixed(1) + "%",
-        dx: d => d.median_pm >= 0 ? 6 : -6,
+        textAnchor: "middle",
+        fontSize: 9, fontWeight: "bold", fill: "white"
+      }),
+      // Labels OUTSIDE narrow bars (dark, just past bar end)
+      Plot.text(med.filter(d => Math.abs(d.median_pm) < INSIDE_THRESH), {
+        x: d => d.median_pm,
+        y: "gene_snp_ra",
+        text: d => d.median_pm.toFixed(1) + "%",
+        dx: d => d.median_pm >= 0 ? 5 : -5,
         textAnchor: d => d.median_pm >= 0 ? "start" : "end",
         fontSize: 9, fill: "#333"
       })
@@ -762,6 +566,82 @@ Inputs.table(geneSummary, {
   },
   sort: "best_pvalue", reverse: false, rows: 25
 })
+```
+
+## Volcano
+
+*Effect size (β) vs −log₁₀(p-value) for each variant. Use the dropdown to focus on a single IS index or view all 23 at once in a grid. Dashed lines mark p = 0.05 (orange) and p = 0.001 (red).*
+
+```{ojs}
+viewof volcanoIndex = Inputs.select(
+  ["All Indices", ...visibleIndices],
+  { label: "IS Index (All = 3-column grid)", value: "All Indices" }
+)
+```
+
+```{ojs}
+{
+  const vData = filtered.map(d => ({
+    ...d,
+    log10p: -Math.log10(+d.pvalue + 1e-300),
+    sig: +d.pvalue < 0.001 ? "p < 0.001" : +d.pvalue < 0.05 ? "p < 0.05" : "NS"
+  }))
+
+  const pal = { "p < 0.001": "#c0392b", "p < 0.05": "#e67e22", "NS": "#bdc3c7" }
+
+  if (volcanoIndex !== "All Indices") {
+    const sub = vData.filter(d => d.is_index === volcanoIndex)
+    return Plot.plot({
+      width, height: 500,
+      marginLeft: 60, marginBottom: 50, marginTop: 20, marginRight: 20,
+      style: { fontSize: "11px" },
+      color: { domain: Object.keys(pal), range: Object.values(pal), legend: true, label: "Significance" },
+      x: { label: "Effect size (β)", grid: true },
+      y: { label: "-log₁₀(p-value)", grid: true },
+      marks: [
+        Plot.dot(sub, {
+          x: d => +d.beta, y: "log10p", fill: "sig", r: 5, opacity: 0.8,
+          title: d => d.gene_snp_ra + "\nβ = " + (+d.beta).toFixed(5) + "\np = " + (+d.pvalue).toExponential(3)
+        }),
+        Plot.ruleX([0], { stroke: "#aaa", strokeWidth: 1.2 }),
+        Plot.ruleY([-Math.log10(0.05)],  { stroke: "#e67e22", strokeDasharray: "6,3", strokeWidth: 1.5 }),
+        Plot.ruleY([-Math.log10(0.001)], { stroke: "#c0392b", strokeDasharray: "3,3", strokeWidth: 1.5 }),
+        Plot.text(sub.filter(d => +d.pvalue < 1e-4), {
+          x: d => +d.beta, y: "log10p", text: "gene_snp_ra", dy: -8, fontSize: 8, fill: "#333"
+        })
+      ]
+    })
+  }
+
+  // All Indices: 3-column mini-plot grid
+  const nCols  = 3
+  const sw     = Math.max(220, Math.floor((width - 32) / nCols))
+  const grid   = html`<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:6px;">`
+  for (const idx of visibleIndices) {
+    const sub = vData.filter(d => d.is_index === idx)
+    grid.appendChild(html`<div style="border:1px solid #dde3ec;border-radius:6px;padding:4px;background:#fafafa;">
+      <div style="font-size:9.5px;font-weight:700;color:#2c3e50;padding:2px 4px;text-align:center;">${idx}</div>
+      ${Plot.plot({
+        width: sw - 10, height: 180,
+        marginLeft: 38, marginBottom: 26, marginTop: 4, marginRight: 6,
+        style: { fontSize: "8px" },
+        color: { domain: Object.keys(pal), range: Object.values(pal) },
+        x: { label: "β" },
+        y: { label: "-log₁₀p" },
+        marks: [
+          Plot.dot(sub, {
+            x: d => +d.beta, y: "log10p", fill: "sig", r: 2.5, opacity: 0.75,
+            title: d => d.gene_snp_ra + "\nβ=" + (+d.beta).toFixed(5) + "\np=" + (+d.pvalue).toExponential(3)
+          }),
+          Plot.ruleX([0], { stroke: "#ccc", strokeWidth: 1 }),
+          Plot.ruleY([-Math.log10(0.05)],  { stroke: "#e67e22", strokeDasharray: "4,3", strokeWidth: 1 }),
+          Plot.ruleY([-Math.log10(0.001)], { stroke: "#c0392b", strokeDasharray: "2,2", strokeWidth: 1 })
+        ]
+      })}
+    </div>`)
+  }
+  return grid
+}
 ```
 
 :::
