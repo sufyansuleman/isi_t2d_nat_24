@@ -3,7 +3,7 @@ title: "ISI–T2D Genetic Association Browser"
 output:
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill
+    vertical_layout: scroll
     theme:
       version: 4
       bootswatch: flatly
@@ -60,7 +60,7 @@ radioButtons("analysis", "Analysis",
 
 hr()
 
-textInput("search", label = "🔍 Gene name / rsID",
+textInput("search", label = "Search: Gene name / rsID",
           placeholder = "e.g.  KCNJ11  or  rs5219")
 
 checkboxGroupInput("groups", "Index Groups",
@@ -71,11 +71,11 @@ checkboxGroupInput("groups", "Index Groups",
 hr()
 
 sliderInput("pval",     "Max p-value",   min = 0, max = 1,    value = 1,    step = 0.05)
-sliderInput("beta_abs", "Min |β|",       min = 0, max = 0.03, value = 0,    step = 0.001)
+sliderInput("beta_abs", "Min |beta|",     min = 0, max = 0.03, value = 0,    step = 0.001)
 
 hr()
 
-actionButton("reset_btn", "⟳  Reset filters",
+actionButton("reset_btn", "Reset filters",
              class = "btn btn-outline-secondary btn-sm w-100")
 ```
 
@@ -161,7 +161,7 @@ renderPlotly({ plot_heatmap(fd()) })
 BMI Comparison {data-icon="fa-balance-scale"}
 =====================================
 
-Column {data-width=50%}
+Column
 -------------------------------------
 
 ### BMI-Adjusted heatmap
@@ -184,16 +184,13 @@ renderPlotly({
 })
 ```
 
-Column {data-width=50%}
--------------------------------------
-
-### Δβ map  (no-BMI − BMI-adj)  — purple = BMI attenuates, green = BMI amplifies
+### Beta diff map (no-BMI minus BMI-adj) — purple = BMI attenuates, green = BMI amplifies
 
 ```{r}
 renderPlotly({ plot_bmi_diff_heatmap(fj(), min_h = 420) })
 ```
 
-### β scatter  (BMI-adj vs no-BMI)
+### Beta scatter (BMI-adj vs no-BMI)
 
 ```{r}
 renderPlotly({ plot_beta_scatter(fj()) })
@@ -235,16 +232,16 @@ Column {.sidebar data-width=260}
 
 ```{r}
 renderUI({
-  choices <- c("" = "", sort(unique(fd()$gene_snp_ra)))
-  selectizeInput("forest_var", "Select variant (gene – rsID – allele)",
+  choices <- c("-- select variant --" = "", sort(unique(fd()$gene_snp_ra)))
+  selectizeInput("forest_var", "Select variant (gene - rsID - allele)",
     choices  = choices,
     selected = "",
-    options  = list(placeholder = "Type to search…"),
+    options  = list(placeholder = "Type to search..."),
     width    = "100%"
   )
 })
 
-p("Shows β across all 23 IS indices for the selected variant.
+p("Shows beta across all 23 IS indices for the selected variant.
   Both analyses are overlaid for direct comparison.",
   style = "font-size:0.75rem; color:#777; margin-top:0.5rem")
 ```
