@@ -8,7 +8,7 @@
   margin-bottom: 1.75rem;
 }
 
-/* ── Controls card (vertical stack, fixed width) ─────────────────────────── */
+/* ── Controls column (fixed width, houses the card + stats) ────────────────── */
 .left-column {
   flex:          0 0 900px;
   display:       flex;
@@ -16,30 +16,35 @@
   gap:           0.75rem;
 }
 
+/* ── Controls card — 2-column grid so each input gets ~half width ───────────── */
 .controls-card {
-  flex: unset;
-  background:    #f4f6fb;
-  border:        1px solid #c5cfe0;
-  border-radius: 10px;
-  padding:       1rem 1.1rem;
-  box-shadow:    0 2px 8px rgba(0,0,0,.08);
+  flex:                  unset;
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap:            2.5rem;
+  row-gap:               0.55rem;
+  align-items:           start;
+  background:            #f4f6fb;
+  border:                1px solid #c5cfe0;
+  border-radius:         10px;
+  padding:               1rem 1.5rem 1.1rem;
+  box-shadow:            0 2px 8px rgba(0,0,0,.08);
 }
 
-/* Each OJS input block sits in its own row, with a bottom gap */
-.controls-card > div,
-.controls-card > p {
-  margin-bottom: 0.85rem;
-}
-.controls-card > div:last-child { margin-bottom: 0; }
-
-/* Bigger, more legible labels — targets Shiny's .control-label and plain <label> */
+/* Observable Inputs: fix label text so it doesn't wrap in narrow cell */
 .controls-card label,
-.controls-card .control-label {
-  font-size:   0.88rem;
-  font-weight: 700;
-  color:       #2c3e50;
-  margin-bottom: 4px;
-  display: block;
+.controls-card form {
+  width: 100%;
+}
+
+/* Nudge Observable's internal label span to stay on one line */
+.controls-card label > span:first-child,
+.controls-card form  > label:first-child {
+  white-space:  nowrap;
+  font-weight:  700 !important;
+  color:        #2c3e50 !important;
+  font-size:    0.84rem !important;
+  min-width:    0 !important;
 }
 
 /* Wider, taller text input */
