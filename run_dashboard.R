@@ -1,6 +1,6 @@
 setwd("C:/Users/rnh585/Documents/Manuscripts_Supplementray_data/isi_t2d_nat_24")
 
-# Locate pandoc — RStudio sets RSTUDIO_PANDOC; outside RStudio we search common locations
+# Locate pandoc: RStudio sets RSTUDIO_PANDOC; outside RStudio we search common locations
 if (!rmarkdown::pandoc_available()) {
   candidate_dirs <- c(
     Sys.getenv("RSTUDIO_PANDOC"),

@@ -42,9 +42,9 @@ All views respond to the shared **search / filter panel** (gene name, rsID, inde
 
 **Insulin sensitivity indices** span three time-point groups:
 
-- *Fasting* — inv-FIns, inv-HOMA-IR, QUICKI, Raynaud SI, Belfiore basal, ISI basal, Bennett SI, Avignon SI₀, FIRI, inv-FIns/FGlu
-- *OGTT 0–120 min* — inv-Ins 120, inv-Glu 120, ISI 120, inv-Ins/Glu120, Gutt Index, Avignon SI120, Avignon SIM
-- *OGTT 0–30–120 min* — Stumvoll Modi, Stumvoll Dem, inv-IFC, BIGTT SI, Matsuda, Matsuda AUC
+- *Fasting*: inv-FIns, inv-HOMA-IR, QUICKI, Raynaud SI, Belfiore basal, ISI basal, Bennett SI, Avignon SI0, FIRI, inv-FIns/FGlu
+- *OGTT 0-120 min*: inv-Ins 120, inv-Glu 120, ISI 120, inv-Ins/Glu120, Gutt Index, Avignon SI120, Avignon SIM
+- *OGTT 0-30-120 min*: Stumvoll Modi, Stumvoll Dem, inv-IFC, BIGTT SI, Matsuda, Matsuda AUC
 
 **BMI mediation** uses the Baron–Kenny formula:
 PM = (β_total − β_direct) / |β_total| × 100, where β_total is the unadjusted effect and β_direct is the BMI-adjusted effect. Only variants with |β_total| ≥ 0.005 across ≥ 3 ISIs are included; individual PMs are clamped to ±300 % before taking the median.

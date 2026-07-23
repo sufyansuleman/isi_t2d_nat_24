@@ -1,5 +1,5 @@
 ---
-title: "T2D Risk Alleles and Insulin Sensitivity — Association Browser"
+title: "T2D Risk Alleles and Insulin Sensitivity: Association Browser"
 subtitle: "Effect sizes for T2D GWAS risk variants (Suzuki et al., *Nature* 2024) across 23 fasting and OGTT-derived insulin sensitivity indices, BMI-adjusted and unadjusted"
 execute:
   echo: false
@@ -19,7 +19,7 @@ ojs_define(
 ```
 
 ::: {.page-description}
-Genetic variants identified in the largest genome-wide association study (GWAS) of type 2 diabetes (T2D) to date — **Suzuki et al., *Nature* 2024** (>2.5 million individuals) — were tested for association with **23 insulin sensitivity indices (ISIs)** derived from fasting blood measurements and oral glucose tolerance tests (OGTTs). For each variant, this browser lets you explore *which ISI it associates with* and *in which direction*, providing mechanistic insight into whether T2D risk alleles act through insulin resistance, impaired insulin secretion, or mixed pathophysiology. Analyses are presented both unadjusted and adjusted for BMI.
+Genetic variants identified in the largest genome-wide association study (GWAS) of type 2 diabetes (T2D) to date (**Suzuki et al., *Nature* 2024**, >2.5 million individuals) were tested for association with **23 insulin sensitivity indices (ISIs)** derived from fasting blood measurements and oral glucose tolerance tests (OGTTs). For each variant, this browser lets you explore *which ISI it associates with* and *in which direction*, providing mechanistic insight into whether T2D risk alleles act through insulin resistance, impaired insulin secretion, or mixed pathophysiology. Analyses are presented both unadjusted and adjusted for BMI.
 :::
 
 ::: {.top-panels}
@@ -319,11 +319,11 @@ viewof deltaVariant = Inputs.select(
 ```{ojs}
 {
   if (!deltaVariant || jVariants.length === 0)
-    return html`<p style="color:#888;padding:1rem;">No variants match current filters — try relaxing p-value or β thresholds.</p>`
+    return html`<p style="color:#888;padding:1rem;">No variants match current filters. Try relaxing p-value or β thresholds.</p>`
 
   const rows = joinedFiltered.filter(d => d.gene_snp_ra === deltaVariant)
   if (rows.length === 0)
-    return html`<p style="color:#888;padding:1rem;">Variant not in current filter set — try relaxing p-value or beta thresholds.</p>`
+    return html`<p style="color:#888;padding:1rem;">Variant not in current filter set. Try relaxing p-value or beta thresholds.</p>`
 
   const domain = visibleIndices.filter(idx => rows.some(d => d.is_index === idx)).reverse()
   const paired = rows.flatMap(d => [
@@ -375,8 +375,8 @@ viewof deltaVariant = Inputs.select(
 ## BMI Mediation
 
 **How to read this chart:** Each bar shows the median % of a variant's genetic effect that is explained by BMI, computed across IS indices using the Baron–Kenny formula.
-**Purple (positive %)** = adjusting for BMI shrinks the effect — BMI mediates part of the association.
-**Green (negative %)** = the effect is *stronger* after BMI adjustment — the variant acts independently of BMI (or is suppressed by it).
+**Purple (positive %)** = adjusting for BMI shrinks the effect; BMI mediates part of the association.
+**Green (negative %)** = the effect is *stronger* after BMI adjustment; the variant acts independently of BMI (or is suppressed by it).
 A value near **100%** means virtually the entire genetic effect operates through BMI; near **0%** means it is BMI-independent.
 
 ```{ojs}
@@ -473,7 +473,7 @@ A value near **100%** means virtually the entire genetic effect operates through
 
 ::: {.panel-tabset}
 
-### By Gene — top associations
+### By Gene: top associations
 
 ```{ojs}
 //| output: false

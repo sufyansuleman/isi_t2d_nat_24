@@ -27,7 +27,7 @@ if (!requireNamespace("rsconnect", quietly = TRUE)) {
 }
 library(rsconnect)
 
-# Files to bundle — include data only if they are small enough (< 100 MB)
+# Files to bundle: include data only if they are small enough (< 100 MB)
 app_files <- c(
   "dashboard.Rmd",
   "R/constants.R",
@@ -47,7 +47,7 @@ if (length(data_files) > 0) {
             round(total_mb, 1), " MB) in deployment bundle.")
     app_files <- c(app_files, paste0("data/", basename(data_files)))
   } else {
-    message("Data files total ", round(total_mb, 1), " MB — too large to bundle.\n",
+    message("Data files total ", round(total_mb, 1), " MB, too large to bundle.\n",
             "Consider hosting data externally and loading via URL in load_data.R.")
   }
 }

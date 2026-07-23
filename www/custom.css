@@ -1,4 +1,4 @@
-/* ── ISI-T2D Browser — custom styles ─────────────────────────────────────── */
+/* ISI-T2D Browser: custom styles */
 
 /* ══ Three-panel top row ════════════════════════════════════════════════════ */
 .top-panels {
@@ -18,7 +18,7 @@
 
 /* ── Controls card ─────────────────────────────────────────────────────────── */
 /* The 2-column grid is rendered by the OJS html` template inside the card.    */
-/* CSS here only provides visual styling — no layout overrides needed.          */
+/* CSS here only provides visual styling; no layout overrides needed. */
 .controls-card {
   flex:          unset;
   background:    #f4f6fb;
