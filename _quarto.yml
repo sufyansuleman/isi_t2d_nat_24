@@ -16,6 +16,7 @@ format:
     theme: cosmo
     toc: false
     css: www/custom.css
+    include-after-body: _goatcounter.html
     grid:
       body-width: 1400px
       margin-width: 0px

@@ -656,4 +656,8 @@ viewof volcanoIndex = Inputs.select(
 1. Suzuki K, Hatzikotoulas K, Southam L, Taylor HJ, Yin X, Lorenz KM, et al. **Genetic drivers of heterogeneity in type 2 diabetes pathophysiology.** *Nature.* 2024;627:347–357. [doi:10.1038/s41586-024-07019-6](https://doi.org/10.1038/s41586-024-07019-6)
 
 2. Suleman S, Ängquist L, Linneberg A, Hansen T, Grarup N. **Exploring the genetic intersection between obesity-associated genetic variants and insulin sensitivity indices.** *Sci Rep.* 2025;15(1):15761. [doi:10.1038/s41598-025-98507-w](https://doi.org/10.1038/s41598-025-98507-w) · PMID: 40328835
+
+<p style="font-size:0.78rem; color:#aaa; text-align:right; margin:0.75rem 0 0 0">
+  👁 <span class="goatcounter-count" data-path="/isi_t2d_nat_24/"></span> page views
+</p>
 :::
